@@ -11,7 +11,26 @@ for more information on the representation of the Kalah board).
 Functions which alter the game state return a new tuple representing the new
 game state.
 
+For more information on the rules of the game, see:
+https://en.wikipedia.org/wiki/Kalah#Rules
+
 """
+
+SOUTHERN_HOUSES = range(6)
+NORTHERN_HOUSES = range(7,13)
+SOUTHERN_STORE = 6
+NORTHERN_STORE = 13
+STORES = {'N': NORTHERN_STORE,
+          'S': SOUTHERN_STORE,
+          'All': NORTHERN_STORE}
+HOUSES = {'N': NORTHERN_HOUSES,
+		  'S': SOUTHERN_HOUSES,
+		  'All': SOUTHERN_HOUSES + NORTHERN_HOUSES}
+OPPOSITE_HOUSES = dict(
+	zip(SOUTHERN_HOUSES,
+		reversed(NORTHERN_HOUSES))
+	+ zip(NORTHERN_HOUSES,
+		reversed(SOUTHERN_HOUSES)))
 
 def newGame(north_starts=True):
 	if north_starts:
@@ -68,7 +87,34 @@ def _validateBoard(board):
 	return True
 
 def _validateMove(game_state, house):
-	pass
+	player = game_state[0]
+	if house not in HOUSES[player]:
+		return False
+	return True
+
+def _sow(board, house):
+	"""Sows seeds, without considering whose move it is or whether the move
+	is valid."""
+	seeds = board[house]
+	houses_to_increment = range(house+1, house+seeds+1)
+	new_board = tuple([n + 1 for i, n in emumerate(board)
+				 	   if i in houses_to_increment
+				 	   else 0 if i == house
+				 	   else n)
+	return new_board
+
+def _capture_opposites(board, last_house_sown, player):
+	if last_house_sown not in HOUSES[player]:
+		return board
+
+	winning_store = STORES[player]
+	new_score = (board[winning_store] + board[last_house_sown] 
+	   	         + board[OPPOSITE_HOUSES[last_house_sown]]) 
+	new_board = tuple([0 for i, n in enumerate(board)
+					   if i in (last_house_sown,
+					   			OPPOSITE_HOUSES[last_house_sown])
+					   else new_score if i == winning_store
+					   else n)
 
 def move(game_state, house):
 	"""Specifies a move on a board, by giving the house from which 'seeds' 
@@ -86,7 +132,32 @@ def move(game_state, house):
 		A tuple of the form (next player, board), representing the game state
 		after the move.
 	"""
-	pass
+	
+	# Check valid move
+	if not _validateMove(game_state, house):
+		raise ValueError("Invalid Kalah move.")
+
+	player, old_board = game_state
+
+	# Sow seeds
+	new_board = _sow(old_board, house)
+
+	# If the last sown seed lands in an empty house owned by the player, and
+	# the opposite house contains seeds, both the last seed and the opposite
+	# seeds are captured and placed into the player's store.
+	last_house_sown = house + old_board[house]
+	new_board = _capture_opposites(new_board, last_house_sown, player)
+
+	# If the last sown seed lands in the player's store, the player gets an
+	# additional move.
+	if last_house_sown = STORES[player]:
+		next_player = player
+	else:
+		next_player = 'N' if player == 'S' else 'S'
+
+	return (next_player, new_board)
+
+
 
 def winner(game_state):
 	"""Indicates the winner of the game if either player has won at this stage
@@ -97,9 +168,13 @@ def winner(game_state):
 		board: A tuple representing the current game state.
 
 	Returns:
-		'N' if the northern player has won.
-		'S' if the southern player has won.
-		'D' if the game is a draw.
-		None if the game is still ongoing.
+		If the game is finished, returns the scores in the form (south, north)
+		returns None if the game is still ongoing.
 	"""
-	pass
+	board = game_state[1]
+	north_houses_sum = sum([board[i] for i in NORTHERN_HOUSES])
+	south_houses_sum = sum([board[i] for i in SOUTHERN_HOUSES])
+	if north_houses_sum == 0 or south_houses_sum == 0:
+		north_score = board[NORTHERN_STORE] + north_houses_sum
+		south_score = board[SOUTHERN_STORE] + south_houses_sum
+		return (south_score, north_score)
