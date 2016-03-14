@@ -178,3 +178,24 @@ def winner(game_state):
 		north_score = board[NORTHERN_STORE] + north_houses_sum
 		south_score = board[SOUTHERN_STORE] + south_houses_sum
 		return (south_score, north_score)
+
+def _print_board(board):
+	# TODO: Sort out template string to accomodate two digit numbers
+	template = """
+       <--- North
+ ------------------------    
+  {12:>2}  {11:>2}  {10:>2}  {9:>2}  {8:>2}  {7:>2}     
+                             
+  {13:>2}                  {6:>2}    
+                            
+  {0:>2}  {1:>2}  {2:>2}  {3:>2}  {4:>2}  {5:>2}       
+ ------------------------     
+         South --->
+"""
+	return template.format(board)
+
+def command_line_game()
+	pass
+
+if __name__ == "__main__":
+	command_line_game()
