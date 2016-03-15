@@ -15,7 +15,9 @@ For more information on the rules of the game, see:
 https://en.wikipedia.org/wiki/Kalah#Rules
 
 """
+import random
 
+# Useful "constants" 
 SOUTHERN_HOUSES = range(6)
 NORTHERN_HOUSES = range(7,13)
 SOUTHERN_STORE = 6
@@ -33,10 +35,9 @@ OPPOSITE_HOUSES = dict(
         reversed(SOUTHERN_HOUSES)))
 
 def newGame(north_starts=True):
-    if north_starts:
-        first_player = 'N'
-    else:
-        first_player = 'S'
+    """Create a new game, with North starting first unless otherwise
+    specified."""
+    first_player = 'N' if north_starts else 'S'
     board = _newBoard()
     game_state = (first_player, board)
     return game_state
@@ -87,6 +88,11 @@ def _validateBoard(board):
     return True
 
 def _validateMove(game_state, house):
+    """Validates a move.
+
+    Checks if the house chosen belongs to the current player, and if it 
+    contains any tokens."""
+
     player, board = game_state
     if house not in HOUSES[player]:
         return False
@@ -95,14 +101,24 @@ def _validateMove(game_state, house):
     return True
 
 def _sow(board, house):
-    """Sows seeds, without considering whose move it is or whether the move
-    is valid."""
+    """Sows seeds from chosen house, without considering whose move it is or
+    whether the move is valid."""
+    
     seeds = board[house]
+
+    # List of the indexes of houses to increment. Uses modulo to ensure that
+    # indices wrap around to 0 after the last index is reached. For example,
+    # If the user sows from house 12, which contains 5 seeds, the houses / 
+    # stores at index 13, 0, 1, 2 and 3 would be incremented.
     houses_to_increment = [i % 14 for i in range(house+1, house+seeds+1)]
-    new_board = tuple(n + 1 if i in houses_to_increment
-                      else 0 if i == house
-                      else n
+
+    # Create new board
+    new_board = tuple(n + 1 if i in houses_to_increment # Increment clockwise
+                      else 0 if i == house # remove seeds from chosen house
+                      else n # Leave other houses untouched
                       for i, n in enumerate(board))
+                        # i is the index, n the value at that index
+
     return new_board
 
 def _capture_opposites(board_pre_sowing,
@@ -110,7 +126,8 @@ def _capture_opposites(board_pre_sowing,
                        last_house_sown,
                        player):
     if (last_house_sown not in HOUSES[player]
-        or board_pre_sowing[last_house_sown] != 0):
+        or board_pre_sowing[last_house_sown] != 0
+        or board_pre_sowing[OPPOSITE_HOUSES[last_house_sown]] == 0):
         return board_post_sowing
 
     winning_store = STORES[player]
@@ -179,8 +196,9 @@ def winner(game_state):
         board: A tuple representing the current game state.
 
     Returns:
-        If the game is finished, returns the scores in the form (south, north)
-        returns None if the game is still ongoing.
+        If the game is finished, returns the scores in the form
+        (south, north).
+        Returns None if the game is still ongoing.
     """
     board = game_state[1]
     north_houses_sum = sum([board[i] for i in NORTHERN_HOUSES])
@@ -191,7 +209,8 @@ def winner(game_state):
         return (south_score, north_score)
 
 def _print_board(board):
-    # TODO: Sort out template string to accomodate two digit numbers
+    """Prettily print a Kalah board."""
+
     template = """
        <--- North
  ------------------------    
@@ -206,6 +225,9 @@ def _print_board(board):
     return template.format(*board)
 
 def _print_board_plus_legend(board):
+    """Return a string, representing in easily readable format: a board, plus 
+    a 'legend' showing the numbers of each house / store, side by side"""
+
     board_lines = _print_board(board).split('\n')
     legend_lines = _print_board(range(14)).split('\n')
     lines = ( "{:<30}{:<30}".format(*pair)
@@ -213,7 +235,7 @@ def _print_board_plus_legend(board):
     return '\n'.join(lines)
 
 def command_line_game():
-    import random
+
     game_state = newGame(north_starts=random.choice([True, False]))
 
     while True:
