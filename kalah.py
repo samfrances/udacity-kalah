@@ -125,6 +125,27 @@ def _capture_opposites(board_pre_sowing,
                        board_post_sowing,
                        last_house_sown,
                        player):
+    """Takes the board state at the beginning of the turn, before any move
+    has been made, and the board state after seeds has been sown, and decides
+    whether capture can take place. If not, returns the board unchanged, 
+    otherwise returns the board after capture has taken place.
+
+    The capture rule is as follows:
+        If the last sown seed lands in an empty house owned by the player, and
+        the opposite house contains seeds, both the last seed and the opposite
+        seeds are captured and placed into the player's store.
+
+    Args:
+        board_pre_sowing: The board state at the beginning of the turn.
+        board_post_sowing: The board state after sowing, but before capture
+            has taken place.
+        last_house_sown: The last house sown.
+        player: The player whose turn it is.
+
+    Returns:
+        If capture takes place, returns the board after capture.
+        Otherwise, returns the board_post_sowing."""
+
     if (last_house_sown not in HOUSES[player]
         or board_pre_sowing[last_house_sown] != 0
         or board_pre_sowing[OPPOSITE_HOUSES[last_house_sown]] == 0):
@@ -250,13 +271,13 @@ def command_line_game():
         player_name = ('Northern player' if player == 'N'
                        else 'Southern player')
         
-        invalid_move = True
-        while invalid_move:
+        valid_move = False
+        while not valid_move:
             try:
                 next_move = int(
                     raw_input("Your move {}: ".format(player_name)))
                 new_game_state = move(game_state, next_move)
-                invalid_move = False
+                valid_move = True
             except ValueError as e:
                 print "Invalid move. Please try again."
         game_state = new_game_state
