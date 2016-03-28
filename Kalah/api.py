@@ -1,18 +1,18 @@
-# # -*- coding: utf-8 -*-`
-# """api.py - Create and configure the Game API exposing the resources.
-# This can also contain game logic. For more complex games it would be wise to
-# move game logic to another file. Ideally the API will be simple, concerned
-# primarily with communication to/from the API's users."""
+# -*- coding: utf-8 -*-`
+"""api.py - Create and configure the Game API exposing the resources.
+This can also contain game logic. For more complex games it would be wise to
+move game logic to another file. Ideally the API will be simple, concerned
+primarily with communication to/from the API's users."""
 
 
 # import logging
-# import endpoints
-# from protorpc import remote, messages
+import endpoints
+from protorpc import remote, messages
 # from google.appengine.api import memcache
 # from google.appengine.api import taskqueue
 
-# from models import User, Game, Score
-# from models import StringMessage, NewGameForm, GameForm, MakeMoveForm,\
+from models import User#, Game, Score
+from models import StringMessage#, NewGameForm, GameForm, MakeMoveForm,\
 #     ScoreForms
 # from utils import get_by_urlsafe
 
@@ -22,28 +22,28 @@
 # MAKE_MOVE_REQUEST = endpoints.ResourceContainer(
 #     MakeMoveForm,
 #     urlsafe_game_key=messages.StringField(1),)
-# USER_REQUEST = endpoints.ResourceContainer(user_name=messages.StringField(1),
-#                                            email=messages.StringField(2))
+USER_REQUEST = endpoints.ResourceContainer(user_name=messages.StringField(1),
+                                           email=messages.StringField(2))
 
 # MEMCACHE_MOVES_REMAINING = 'MOVES_REMAINING'
 
-# @endpoints.api(name='guess_a_number', version='v1')
-# class GuessANumberApi(remote.Service):
-#     """Game API"""
-#     @endpoints.method(request_message=USER_REQUEST,
-#                       response_message=StringMessage,
-#                       path='user',
-#                       name='create_user',
-#                       http_method='POST')
-#     def create_user(self, request):
-#         """Create a User. Requires a unique username"""
-#         if User.query(User.name == request.user_name).get():
-#             raise endpoints.ConflictException(
-#                     'A User with that name already exists!')
-#         user = User(name=request.user_name, email=request.email)
-#         user.put()
-#         return StringMessage(message='User {} created!'.format(
-#                 request.user_name))
+@endpoints.api(name='kalah', version='v1')
+class KalahApi(remote.Service):
+    """Game API"""
+    @endpoints.method(request_message=USER_REQUEST,
+                      response_message=StringMessage,
+                      path='user',
+                      name='create_user',
+                      http_method='POST')
+    def create_user(self, request):
+        """Create a User. Requires a unique username"""
+        if User.query(User.name == request.user_name).get():
+            raise endpoints.ConflictException(
+                    'A User with that name already exists!')
+        user = User(name=request.user_name, email=request.email)
+        user.put()
+        return StringMessage(message='User {} created!'.format(
+                request.user_name))
 
 #     @endpoints.method(request_message=NEW_GAME_REQUEST,
 #                       response_message=GameForm,
@@ -153,4 +153,4 @@
 #                          'The average moves remaining is {:.2f}'.format(average))
 
 
-# api = endpoints.api_server([GuessANumberApi])
+api = endpoints.api_server([KalahApi])
