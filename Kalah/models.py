@@ -2,10 +2,11 @@
 entities used by the Game. Because these classes are also regular Python
 classes they can include methods (such as 'to_form' and 'new_game')."""
 
-# import random
+import random
 # from datetime import date
 from protorpc import messages
 from google.appengine.ext import ndb
+import kalah
 
 # - - - Datastore models - - - - - - - - - - - - -
 
@@ -15,36 +16,40 @@ class User(ndb.Model):
     email =ndb.StringProperty()
 
 
-# class Game(ndb.Model):
-#     """Game object"""
-#     target = ndb.IntegerProperty(required=True)
-#     attempts_allowed = ndb.IntegerProperty(required=True)
-#     attempts_remaining = ndb.IntegerProperty(required=True, default=5)
-#     game_over = ndb.BooleanProperty(required=True, default=False)
-#     user = ndb.KeyProperty(required=True, kind='User')
+class Game(ndb.Model):
+    """Game object"""
+    north_user = ndb.KeyProperty(required=True, kind='User')
+    south_user = ndb.KeyProperty(required=True, kind='User')
+    game_state = ndb.PickleProperty(required=True)
+    game_over = ndb.BooleanProperty(required=True, default=False)
 
-#     @classmethod
-#     def new_game(cls, user, min, max, attempts):
-#         """Creates and returns a new game"""
-#         if max < min:
-#             raise ValueError('Maximum must be greater than minimum')
-#         game = Game(user=user,
-#                     target=random.choice(range(1, max + 1)),
-#                     attempts_allowed=attempts,
-#                     attempts_remaining=attempts,
-#                     game_over=False)
-#         game.put()
-#         return game
+    @classmethod
+    def new_game(cls, north_user, south_user):
+        """Creates and returns a new game."""
+        new_game_state = kalah.newGame(north_starts=random.choice([True, False]))
+        game = cls(north_user=north_user,
+                   south_user=south_user,
+                   game_state=new_game_state,
+                   game_over=False)
+        game.put()
+        return game
 
-#     def to_form(self, message):
-#         """Returns a GameForm representation of the Game"""
-#         form = GameForm()
-#         form.urlsafe_key = self.key.urlsafe()
-#         form.user_name = self.user.get().name
-#         form.attempts_remaining = self.attempts_remaining
-#         form.game_over = self.game_over
-#         form.message = message
-#         return form
+    def move(self, n):
+        """Accepts move, updates game state, returns a GameForm.
+        TODO: write this method"""
+        pass
+
+    def to_form(self, message):
+        """Returns a GameForm representation of the Game"""
+        form = GameForm()
+        form.urlsafe_key = self.key.urlsafe()
+        form.north_user_name = self.north_user.get().name
+        form.south_user_name = self.south_user.get().name
+        form.game_over = self.game_over
+        form.message = message
+        form.next_to_play = self.game_state[0]
+        form.board = self.game_state[1]
+        return form
 
 #     def end_game(self, won=False):
 #         """Ends the game - if won is True, the player won. - if won is False,
@@ -72,22 +77,25 @@ class User(ndb.Model):
 
 # - - - Message Forms - - - - - - - - - - - - - - - -
 
-# class GameForm(messages.Message):
-#     """GameForm for outbound game state information"""
-#     urlsafe_key = messages.StringField(1, required=True)
-#     attempts_remaining = messages.IntegerField(2, required=True)
-#     game_over = messages.BooleanField(3, required=True)
-#     message = messages.StringField(4, required=True)
-#     user_name = messages.StringField(5, required=True)
+class GameForm(messages.Message):
+    """GameForm for outbound game state information"""
+    urlsafe_key = messages.StringField(1, required=True)
+    game_over = messages.BooleanField(2, required=True)
+    message = messages.StringField(3, required=True)
+    north_user_name = messages.StringField(4, required=True) # TODO: Check if necessary
+    south_user_name = messages.StringField(5, required=True) # TODO: Check if necessary
+    next_to_play = messages.StringField(6, required=True)
+    board = messages.IntegerField(7,
+                                  repeated=True,
+                                  # Required to overcome bug which represented
+                                  # integers as strings in JSON response:
+                                  variant=messages.Variant.INT32)
 
 
-# class NewGameForm(messages.Message):
-#     """Used to create a new game"""
-#     user_name = messages.StringField(1, required=True)
-#     min = messages.IntegerField(2, default=1)
-#     max = messages.IntegerField(3, default=10)
-#     attempts = messages.IntegerField(4, default=5)
-
+class NewGameForm(messages.Message):
+    """Used to create a new game"""
+    north_user_name = messages.StringField(1, required=True)
+    south_user_name = messages.StringField(2, required=True)
 
 # class MakeMoveForm(messages.Message):
 #     """Used to make a move in an existing game"""

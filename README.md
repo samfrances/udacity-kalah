@@ -40,7 +40,7 @@ The rules are as follows:
 > [https://en.wikipedia.org/wiki/Kalah#Rules]
 > (https://en.wikipedia.org/wiki/Kalah#Rules)
 
-The Kalah board is represented a tuple of 14 integers, with indexes 0-5
+The Kalah board is internally represented a tuple of 14 integers, with indexes 0-5
 representing the South player's houses, indexes 7-12 representing the North
 player's houses, index 6 representing the South player's store, and index 13
 representing the North player's store.
@@ -57,10 +57,14 @@ representing the North player's store.
         South --->
 ``` 
 
-The game state at any particular point in the game is representing by a tuple
+The game state at any particular point in the game is internally representing by a tuple
 of the form `(player who moves next, board)`. The player who moves next is
 represented as either `'N'` for the northern player or `'S'` for the southern
 player.
+
+In terms of the API, the game state is represented to the client by a `GameForm`,
+with the `next_player` field giving the player who moves next, and the `board` 
+field giving the state of the board.
 
 'Moves' are sent to the `make_move` endpoint, specifying the index of the house
 chosen. The `make_move` endpoint will reply with the resulting
@@ -87,13 +91,27 @@ given time. Each game can be retrieved or played by using the path parameter
     - Returns: Message confirming creation of the User.
     - Description: Creates a new User. user_name provided must be unique. Will 
     raise a ConflictException if a User with that user_name already exists.
+ - **new_game**
+    - Path: 'game'
+    - Method: POST
+    - Parameters: north_user_name, south_user_name
+    - Returns: GameForm with initial game state.
+    - Description: Creates a new Game. The usernames provided must correspond to
+    existing users, or they will raise a NotFoundException.
     
 
 ##Models Included:
  - **User**
     - Stores unique user_name and (optional) email address.
+ - **Game**
+    - Stores game states. Associated with User model via KeyProperty, storing
+      north user and south user.
     
 ##Forms Included:
+ - **GameForm**
+    - Represents current game state (urlsafe_key, game_over, message, north_user_name, south_user_name, next_to_play, board)
+ - **NewGameForm**
+    - Used to create a new game (north_user_name, south_user_name)
  - **StringMessage**
     - General purpose String container.
 
