@@ -14,11 +14,11 @@ from protorpc import remote, messages
 from models import User, Game#, Score
 from models import StringMessage, NewGameForm, GameForm#, MakeMoveForm,\
 #     ScoreForms
-# from utils import get_by_urlsafe
+from utils import get_by_urlsafe
 
 NEW_GAME_REQUEST = endpoints.ResourceContainer(NewGameForm)
-# GET_GAME_REQUEST = endpoints.ResourceContainer(
-#         urlsafe_game_key=messages.StringField(1),)
+GET_GAME_REQUEST = endpoints.ResourceContainer(
+        urlsafe_game_key=messages.StringField(1),)
 # MAKE_MOVE_REQUEST = endpoints.ResourceContainer(
 #     MakeMoveForm,
 #     urlsafe_game_key=messages.StringField(1),)
@@ -70,18 +70,18 @@ class KalahApi(remote.Service):
         #taskqueue.add(url='/tasks/cache_average_attempts')
         return game.to_form('Good luck playing Kalah!')
 
-#     @endpoints.method(request_message=GET_GAME_REQUEST,
-#                       response_message=GameForm,
-#                       path='game/{urlsafe_game_key}',
-#                       name='get_game',
-#                       http_method='GET')
-#     def get_game(self, request):
-#         """Return the current game state."""
-#         game = get_by_urlsafe(request.urlsafe_game_key, Game)
-#         if game:
-#             return game.to_form('Time to make a move!')
-#         else:
-#             raise endpoints.NotFoundException('Game not found!')
+    @endpoints.method(request_message=GET_GAME_REQUEST,
+                      response_message=GameForm,
+                      path='game/{urlsafe_game_key}',
+                      name='get_game',
+                      http_method='GET')
+    def get_game(self, request):
+        """Return the current game state."""
+        game = get_by_urlsafe(request.urlsafe_game_key, Game)
+        if game:
+            return game.to_form('Time to make a move!')
+        else:
+            raise endpoints.NotFoundException('Game not found!')
 
 #     @endpoints.method(request_message=MAKE_MOVE_REQUEST,
 #                       response_message=GameForm,

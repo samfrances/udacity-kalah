@@ -98,6 +98,12 @@ given time. Each game can be retrieved or played by using the path parameter
     - Returns: GameForm with initial game state.
     - Description: Creates a new Game. The usernames provided must correspond to
     existing users, or they will raise a NotFoundException.
+ - **get_game**
+    - Path: 'game/{urlsafe_game_key}'
+    - Method: GET
+    - Parameters: urlsafe_game_key
+    - Returns: GameForm with current game state.
+    - Description: Returns the current state of a game.
     
 
 ##Models Included:
@@ -120,3 +126,5 @@ given time. Each game can be retrieved or played by using the path parameter
  [udacity/FSND-P4-Design-A-Game]
  (https://github.com/udacity/FSND-P4-Design-A-Game) was used as the starting
  point for this Kalah project.
+    - `utils.get_by_urlsafe` was used as provided, without modification.
+    - The code for the `get_game` endpoint was used as provided.
