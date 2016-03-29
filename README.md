@@ -110,6 +110,11 @@ given time. Each game can be retrieved or played by using the path parameter
     - Parameters: urlsafe_game_key, user_name, house
     - Returns: GameForm with new game state, or with error message.
     - Description: Accepts a 'move' and returns the updated state of the game.
+ - **get_user_games**
+    - Path: 'user/games'
+    - Method: GET
+    - Parameters: user_name, email (optional)
+    - Returns: GamesForm with games associated with given user.
 
 ##Models Included:
  - **User**
@@ -127,6 +132,8 @@ given time. Each game can be retrieved or played by using the path parameter
     - Used to create a new game (north_user_name, south_user_name).
  - **MakeMoveForm**
     - Used to make a move (house, user_name).
+ - **GamesForm**
+    - Provides a list of GameForms.
  - **StringMessage**
     - General purpose String container.
 

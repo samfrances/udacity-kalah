@@ -12,8 +12,8 @@ from protorpc import remote, messages
 # from google.appengine.api import taskqueue
 
 from models import User, Game#, Score
-from models import StringMessage, NewGameForm, GameForm, MakeMoveForm#,\
-#     ScoreForms
+from models import StringMessage, NewGameForm, GameForm, MakeMoveForm,\
+    GamesForm#, ScoreForms
 from utils import get_by_urlsafe
 import kalah
 
@@ -94,37 +94,37 @@ class KalahApi(remote.Service):
 
         # Check player a participant in game
         if moving_user_id != game.north_user.id():
-        	if moving_user_id != game.south_user.id():
-        		return game.to_form('Player not a participant in this game.')
+            if moving_user_id != game.south_user.id():
+                return game.to_form('Player not a participant in this game.')
 
         # Check the move is made by the player who's turn it is
         if game.game_state[0] == 'N':
-        	legitimate_moving_user_id = game.north_user.id()
+            legitimate_moving_user_id = game.north_user.id()
         else:
-        	legitimate_moving_user_id = game.south_user.id()
+            legitimate_moving_user_id = game.south_user.id()
         
         if moving_user_id != legitimate_moving_user_id:
-        	return game.to_form('Player moved out of turn.')
+            return game.to_form('Player moved out of turn.')
 
         # Try making the move, return error message if invalid
         try:
-        	game = game.move(request.house)
+            game = game.move(request.house)
         except ValueError:
-        	return game.to_form('Invalid move.')
+            return game.to_form('Invalid move.')
 
         # Check if the game is over, and create appropriate message
         # TODO: Check this works
         msg = ''
         if game.game_over:
-        	msg = 'Game over! '
-        	if game.north_final_score > game.south_final_score:
-        		winner_name = game.north_user.get().name
-        		msg += '{} wins!'.format(winner_name)
-        	elif game.south_final_score > game.north_final_score:
-        		winner_name = game.south_user.get().name
-        		msg += '{} wins!'.format(winner_name)
-        	else:
-        		msg += "Draw!"
+            msg = 'Game over! '
+            if game.north_final_score > game.south_final_score:
+                winner_name = game.north_user.get().name
+                msg += '{} wins!'.format(winner_name)
+            elif game.south_final_score > game.north_final_score:
+                winner_name = game.south_user.get().name
+                msg += '{} wins!'.format(winner_name)
+            else:
+                msg += "Draw!"
 
         print "-------------------"
         print kalah._print_board_plus_legend(game.game_state[1])
@@ -133,13 +133,26 @@ class KalahApi(remote.Service):
         return game.to_form(msg)
 
     def get_user_or_error(self, user_name):
-    	"""Get user with given user name or raise API error"""
-    	user = User.query(User.name == user_name).get()
+        """Get user with given user name or raise API error"""
+        user = User.query(User.name == user_name).get()
         if not user:
             raise endpoints.NotFoundException(
                     'A User with the name {} does not exist!'.format(
-                    	user_name))
+                        user_name))
         return user
+
+# = = = Task 3: Extend Your API = = = = = = = = =
+
+    @endpoints.method(request_message=USER_REQUEST,
+                      response_message=GamesForm,
+                      path='user/games',
+                      name='get_user_games',
+                      http_method='GET')
+    def get_user_games(self, request):
+        """Get a user's active games."""
+        user = self.get_user_or_error(request.user_name)
+        games = user.get_games()
+        return GamesForm(games=[game.to_form() for game in games])
 
 #     @endpoints.method(response_message=ScoreForms,
 #                       path='scores',

@@ -15,6 +15,11 @@ class User(ndb.Model):
     name = ndb.StringProperty(required=True)
     email =ndb.StringProperty()
 
+    def get_games(self):
+        qry = Game.query(ndb.OR(Game.north_user == self.key,
+                                Game.south_user == self.key))
+        return qry.fetch()
+
 
 class Game(ndb.Model):
     """Game object"""
@@ -59,7 +64,7 @@ class Game(ndb.Model):
         return self
 
 
-    def to_form(self, message):
+    def to_form(self, message=''):
         """Returns a GameForm representation of the Game"""
         form = GameForm()
         form.urlsafe_key = self.key.urlsafe()
@@ -129,6 +134,9 @@ class MakeMoveForm(messages.Message):
     house = messages.IntegerField(1, required=True)
     user_name = messages.StringField(2, required=True)
 
+class GamesForm(messages.Message):
+    """Form for outbound list of games"""
+    games = messages.MessageField(GameForm, 1, repeated=True)
 
 # class ScoreForm(messages.Message):
 #     """ScoreForm for outbound Score information"""
