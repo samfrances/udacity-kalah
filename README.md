@@ -63,7 +63,7 @@ represented as either `'N'` for the northern player or `'S'` for the southern
 player.
 
 In terms of the API, the game state is represented to the client by a `GameForm`,
-with the `next_player` field giving the player who moves next, and the `board` 
+with the `next_to_play` field giving the player who moves next, and the `board` 
 field giving the state of the board.
 
 'Moves' are sent to the `make_move` endpoint, specifying the index of the house
