@@ -104,7 +104,12 @@ given time. Each game can be retrieved or played by using the path parameter
     - Parameters: urlsafe_game_key
     - Returns: GameForm with current game state.
     - Description: Returns the current state of a game.
-    
+ - **make_move**
+    - Path: 'game/{urlsafe_game_key}'
+    - Method: PUT
+    - Parameters: urlsafe_game_key, user_name, house
+    - Returns: GameForm with new game state, or with error message.
+    - Description: Accepts a 'move' and returns the updated state of the game.
 
 ##Models Included:
  - **User**
@@ -115,9 +120,13 @@ given time. Each game can be retrieved or played by using the path parameter
     
 ##Forms Included:
  - **GameForm**
-    - Represents current game state (urlsafe_key, game_over, message, north_user_name, south_user_name, next_to_play, board)
+    - Represents current game state (urlsafe_key, game_over, message,
+    north_user_name, south_user_name, next_to_play, board, north_final_score,
+    south_final_score)
  - **NewGameForm**
-    - Used to create a new game (north_user_name, south_user_name)
+    - Used to create a new game (north_user_name, south_user_name).
+ - **MakeMoveForm**
+    - Used to make a move (house, user_name).
  - **StringMessage**
     - General purpose String container.
 

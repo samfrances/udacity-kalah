@@ -22,6 +22,8 @@ class Game(ndb.Model):
     south_user = ndb.KeyProperty(required=True, kind='User')
     game_state = ndb.PickleProperty(required=True)
     game_over = ndb.BooleanProperty(required=True, default=False)
+    north_final_score = ndb.IntegerProperty(required=False)
+    south_final_score = ndb.IntegerProperty(required=False)
 
     @classmethod
     def new_game(cls, north_user, south_user):
@@ -34,10 +36,28 @@ class Game(ndb.Model):
         game.put()
         return game
 
-    def move(self, n):
+    def move(self, house):
         """Accepts move, updates game state, returns a GameForm.
-        TODO: write this method"""
-        pass
+        TODO: test"""
+        # Calculate result of move
+        old_game_state = self.game_state
+        new_game_state = kalah.move(old_game_state, house)
+
+        # Check if the game is over
+        final_scores = kalah.winner(new_game_state)
+        if final_scores:
+            self.game_over = True
+            self.south_final_score = final_scores[0]
+            self.north_final_score = final_scores[1]
+
+        # Update game state
+        self.game_state = new_game_state
+
+        # Save changes to database
+        self.put()
+
+        return self
+
 
     def to_form(self, message):
         """Returns a GameForm representation of the Game"""
@@ -49,6 +69,10 @@ class Game(ndb.Model):
         form.message = message
         form.next_to_play = self.game_state[0]
         form.board = self.game_state[1]
+        if self.south_final_score:
+            form.south_final_score = self.south_final_score
+        if self.north_final_score:
+            form.north_final_score = self.north_final_score
         return form
 
 #     def end_game(self, won=False):
@@ -85,11 +109,14 @@ class GameForm(messages.Message):
     north_user_name = messages.StringField(4, required=True) # TODO: Check if necessary
     south_user_name = messages.StringField(5, required=True) # TODO: Check if necessary
     next_to_play = messages.StringField(6, required=True)
-    board = messages.IntegerField(7,
-                                  repeated=True,
+    board = messages.IntegerField(7, repeated=True,
                                   # Required to overcome bug which represented
                                   # integers as strings in JSON response:
                                   variant=messages.Variant.INT32)
+    north_final_score = messages.IntegerField(8, required=False,
+                                              variant=messages.Variant.INT32)
+    south_final_score = messages.IntegerField(9, required=False,
+                                              variant=messages.Variant.INT32)
 
 
 class NewGameForm(messages.Message):
@@ -97,9 +124,10 @@ class NewGameForm(messages.Message):
     north_user_name = messages.StringField(1, required=True)
     south_user_name = messages.StringField(2, required=True)
 
-# class MakeMoveForm(messages.Message):
-#     """Used to make a move in an existing game"""
-#     guess = messages.IntegerField(1, required=True)
+class MakeMoveForm(messages.Message):
+    """Used to make a move in an existing game"""
+    house = messages.IntegerField(1, required=True)
+    user_name = messages.StringField(2, required=True)
 
 
 # class ScoreForm(messages.Message):

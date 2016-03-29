@@ -12,16 +12,16 @@ from protorpc import remote, messages
 # from google.appengine.api import taskqueue
 
 from models import User, Game#, Score
-from models import StringMessage, NewGameForm, GameForm#, MakeMoveForm,\
+from models import StringMessage, NewGameForm, GameForm, MakeMoveForm#,\
 #     ScoreForms
 from utils import get_by_urlsafe
 
 NEW_GAME_REQUEST = endpoints.ResourceContainer(NewGameForm)
 GET_GAME_REQUEST = endpoints.ResourceContainer(
         urlsafe_game_key=messages.StringField(1),)
-# MAKE_MOVE_REQUEST = endpoints.ResourceContainer(
-#     MakeMoveForm,
-#     urlsafe_game_key=messages.StringField(1),)
+MAKE_MOVE_REQUEST = endpoints.ResourceContainer(
+    MakeMoveForm,
+    urlsafe_game_key=messages.StringField(1),)
 USER_REQUEST = endpoints.ResourceContainer(user_name=messages.StringField(1),
                                            email=messages.StringField(2))
 
@@ -52,16 +52,8 @@ class KalahApi(remote.Service):
                       http_method='POST')
     def new_game(self, request):
         """Creates new game"""
-        north_user = User.query(User.name == request.north_user_name).get()
-        south_user = User.query(User.name == request.south_user_name).get()
-        if not north_user:
-            raise endpoints.NotFoundException(
-                    'A User with the name {} does not exist!'.format(
-                    	request.north_user_name))
-        if not south_user:
-            raise endpoints.NotFoundException(
-                    'A User with the name {} does not exist!'.format(
-                    	request.south_user_name))
+        north_user = self.get_user_or_error(request.north_user_name)
+        south_user = self.get_user_or_error(request.south_user_name)
         game = Game.new_game(north_user.key, south_user.key)
 
         # Use a task queue to update the average attempts remaining.
@@ -83,33 +75,66 @@ class KalahApi(remote.Service):
         else:
             raise endpoints.NotFoundException('Game not found!')
 
-#     @endpoints.method(request_message=MAKE_MOVE_REQUEST,
-#                       response_message=GameForm,
-#                       path='game/{urlsafe_game_key}',
-#                       name='make_move',
-#                       http_method='PUT')
-#     def make_move(self, request):
-#         """Makes a move. Returns a game state with message"""
-#         game = get_by_urlsafe(request.urlsafe_game_key, Game)
-#         if game.game_over:
-#             return game.to_form('Game already over!')
+    @endpoints.method(request_message=MAKE_MOVE_REQUEST,
+                      response_message=GameForm,
+                      path='game/{urlsafe_game_key}',
+                      name='make_move',
+                      http_method='PUT')
+    def make_move(self, request):
+        """Makes a move. Returns a game state with message.
+        TODO: Test game plays correctly."""
+        game = get_by_urlsafe(request.urlsafe_game_key, Game)
+        if game.game_over:
+            return game.to_form('Game already over.')
 
-#         game.attempts_remaining -= 1
-#         if request.guess == game.target:
-#             game.end_game(True)
-#             return game.to_form('You win!')
+        # Check player exists
+        moving_user = self.get_user_or_error(request.user_name)
+        moving_user_id = moving_user.key.id()
 
-#         if request.guess < game.target:
-#             msg = 'Too low!'
-#         else:
-#             msg = 'Too high!'
+        # Check player a participant in game
+        if moving_user_id != game.north_user.id():
+        	if moving_user_id != game.south_user.id():
+        		return game.to_form('Player not a participant in this game.')
 
-#         if game.attempts_remaining < 1:
-#             game.end_game(False)
-#             return game.to_form(msg + ' Game over!')
-#         else:
-#             game.put()
-#             return game.to_form(msg)
+        # Check the move is made by the player who's turn it is
+        if game.game_state[0] == 'N':
+        	legitimate_moving_user_id = game.north_user.id()
+        else:
+        	legitimate_moving_user_id = game.south_user.id()
+        
+        if moving_user_id != legitimate_moving_user_id:
+        	return game.to_form('Player moved out of turn.')
+
+        # Try making the move, return error message if invalid
+        try:
+        	game = game.move(request.house)
+        except ValueError:
+        	return game.to_form('Invalid move.')
+
+        # Check if the game is over, and create appropriate message
+        # TODO: Check this works
+        msg = ''
+        if game.game_over:
+        	msg = 'Game over! '
+        	if game.north_final_score > game.south_final_score:
+        		winner_name = game.north_user.get().name
+        		msg += '{} wins!'.format(winner_name)
+        	elif game.south_final_score > game.north_final_score:
+        		winner_name = game.south_user.get().name
+        		msg += '{} wins!'.format(winner_name)
+        	else:
+        		msg += "Draw!"
+
+        return game.to_form(msg)
+
+    def get_user_or_error(self, user_name):
+    	"""Get user with given user name or raise API error"""
+    	user = User.query(User.name == user_name).get()
+        if not user:
+            raise endpoints.NotFoundException(
+                    'A User with the name {} does not exist!'.format(
+                    	user_name))
+        return user
 
 #     @endpoints.method(response_message=ScoreForms,
 #                       path='scores',
