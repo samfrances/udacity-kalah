@@ -15,6 +15,7 @@ from models import User, Game#, Score
 from models import StringMessage, NewGameForm, GameForm, MakeMoveForm#,\
 #     ScoreForms
 from utils import get_by_urlsafe
+import kalah
 
 NEW_GAME_REQUEST = endpoints.ResourceContainer(NewGameForm)
 GET_GAME_REQUEST = endpoints.ResourceContainer(
@@ -124,6 +125,10 @@ class KalahApi(remote.Service):
         		msg += '{} wins!'.format(winner_name)
         	else:
         		msg += "Draw!"
+
+        print "-------------------"
+        print kalah._print_board_plus_legend(game.game_state[1])
+        print "-------------------"
 
         return game.to_form(msg)
 
