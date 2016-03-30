@@ -115,6 +115,16 @@ given time. Each game can be retrieved or played by using the path parameter
     - Method: GET
     - Parameters: user_name, email (optional)
     - Returns: GamesForm with games associated with given user.
+ - **cancel_game**
+    - Path: 'game/{urlsafe_game_key}'
+    - Method: DELETE
+    - Parameters: urlsafe_game_key
+    - Returns: StringMessage confirming cancellation of game.
+    - Errors:
+        - endpoints.ForbiddenException (403) if the game is already
+          completed or canceled.
+        - endpoints.NotFoundException (404) if the game cannot be found in 
+          datastore.
 
 ##Models Included:
  - **User**

@@ -5,8 +5,12 @@ TESTING TODO:
 
 OTHER TODO:
 
-Update README to reflect new game cancellation endpoint
+-
 
 COMPLETED TODO:
 
-Update make_move endpoint so it doesn't work with canceled games.
+Update README to reflect new game cancellation endpoint
+
+COMPLETED TESTING
+
+-
