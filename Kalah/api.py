@@ -113,7 +113,6 @@ class KalahApi(remote.Service):
             return game.to_form('Invalid move.')
 
         # Check if the game is over, and create appropriate message
-        # TODO: Check this works
         msg = ''
         if game.game_over:
             msg = 'Game over! '
@@ -149,10 +148,27 @@ class KalahApi(remote.Service):
                       name='get_user_games',
                       http_method='GET')
     def get_user_games(self, request):
-        """Get a user's active games."""
+        """Get a user's active games.
+        TODO: Check that only gets active games"""
         user = self.get_user_or_error(request.user_name)
-        games = user.get_games()
+        games = user.get_games(active_only=True)
         return GamesForm(games=[game.to_form() for game in games])
+
+    @endpoints.method(request_message=GET_GAME_REQUEST,
+                      response_message=StringMessage,
+                      path='game/{urlsafe_game_key}',
+                      name='cancel_game',
+                      http_method='DELETE')
+    def cancel_game(self, request):
+        game = get_by_urlsafe(request.urlsafe_game_key, Game)
+        if game:
+            try:
+                game.cancel()
+                return StringMessage(message='Game successfully canceled.')
+            except AttributeError as e:
+                raise endpoints.ForbiddenException(e.msg)
+        else:
+            raise endpoints.NotFoundException('Game not found!')
 
 #     @endpoints.method(response_message=ScoreForms,
 #                       path='scores',

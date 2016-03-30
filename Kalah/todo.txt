@@ -1,0 +1,12 @@
+TESTING TODO:
+
+- Thoroughly test gameplay
+- Check that get_user_games endpoint works and gets only active games
+- Test Game.cancel method
+- Thoroughly test Game.move
+- Test Game.active property
+- Test User.get_games
+
+OTHER TODO:
+
+Update README to reflect new game cancellation endpoint
