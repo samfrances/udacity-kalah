@@ -1,12 +1,19 @@
 TESTING TODO:
 
 - Thoroughly test gameplay
-- Check that get_user_games endpoint works and gets only active games
-- Test Game.cancel method
 - Thoroughly test Game.move
-- Test Game.active property
-- Test User.get_games
 
 OTHER TODO:
 
 Update README to reflect new game cancellation endpoint
+Update GameForm to reflect whether game is canceled or not
+Consider updating get_game endpoint to change message of gameform if game inactive
+Update make_move endpoint so it doesn't work with cancelled games
+
+COMPLETED TESTING:
+
+- Test that cancel_game endpoint does result in cancelation
+- Check that you cannot cancel a game that has been completed
+- Check that Game.active computed field updates when game is completed or canceled
+- Check that User.get_games returns only active games
+- Check that User.get_games can return all games when active_only parameter is False

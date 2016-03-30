@@ -17,8 +17,7 @@ class User(ndb.Model):
 
     def get_games(self, active_only=True):
         """Gets a user's games, by default only those which
-        have not finished or been cancelled.
-        TODO: Test after active_only option added."""
+        have not finished or been cancelled."""
         qry = Game.query(ndb.OR(Game.north_user == self.key,
                                 Game.south_user == self.key))
         if active_only:
@@ -27,15 +26,14 @@ class User(ndb.Model):
 
 
 class Game(ndb.Model):
-    """Game object
-    TODO: Test active property"""
+    """Game object"""
     north_user = ndb.KeyProperty(required=True, kind='User')
     south_user = ndb.KeyProperty(required=True, kind='User')
     game_state = ndb.PickleProperty(required=True)
     game_over = ndb.BooleanProperty(required=True, default=False)
-    cancelled = ndb.BooleanProperty(required=True, default=False)
+    canceled = ndb.BooleanProperty(required=True, default=False)
     active = ndb.ComputedProperty(
-        lambda self: (not self.game_over) and (not self.cancelled))
+        lambda self: (not self.game_over) and (not self.canceled))
     north_final_score = ndb.IntegerProperty(required=False)
     south_final_score = ndb.IntegerProperty(required=False)
 
@@ -79,10 +77,11 @@ class Game(ndb.Model):
         TODO: test"""
         if self.game_over:
             raise AttributeError("Cannot cancel game once it has already finished.")
-        if self.cancelled:
+        if self.canceled:
             raise AttributeError("Game already canceled.")
         else:
-            self.cancelled = True
+            self.canceled = True
+            self.put()
 
     def to_form(self, message=''):
         """Returns a GameForm representation of the Game"""

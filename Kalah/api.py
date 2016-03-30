@@ -148,8 +148,7 @@ class KalahApi(remote.Service):
                       name='get_user_games',
                       http_method='GET')
     def get_user_games(self, request):
-        """Get a user's active games.
-        TODO: Check that only gets active games"""
+        """Get a user's active games."""
         user = self.get_user_or_error(request.user_name)
         games = user.get_games(active_only=True)
         return GamesForm(games=[game.to_form() for game in games])
@@ -160,13 +159,15 @@ class KalahApi(remote.Service):
                       name='cancel_game',
                       http_method='DELETE')
     def cancel_game(self, request):
+        """Cancels the specified game, returning an error
+        if the game is already over or canceled."""
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
         if game:
             try:
                 game.cancel()
                 return StringMessage(message='Game successfully canceled.')
             except AttributeError as e:
-                raise endpoints.ForbiddenException(e.msg)
+                raise endpoints.ForbiddenException(e.message)
         else:
             raise endpoints.NotFoundException('Game not found!')
 
