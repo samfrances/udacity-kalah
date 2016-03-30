@@ -72,7 +72,10 @@ class KalahApi(remote.Service):
         """Return the current game state."""
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
         if game:
-            return game.to_form('Time to make a move!')
+            if game.active:
+                return game.to_form('Time to make a move!')
+            else:
+                return game.to_form('')
         else:
             raise endpoints.NotFoundException('Game not found!')
 
