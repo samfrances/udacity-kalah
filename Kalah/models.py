@@ -17,7 +17,7 @@ class User(ndb.Model):
 
     def get_games(self, active_only=True):
         """Gets a user's games, by default only those which
-        have not finished or been cancelled."""
+        have not finished or been canceled."""
         qry = Game.query(ndb.OR(Game.north_user == self.key,
                                 Game.south_user == self.key))
         if active_only:
@@ -90,6 +90,7 @@ class Game(ndb.Model):
         form.north_user_name = self.north_user.get().name
         form.south_user_name = self.south_user.get().name
         form.game_over = self.game_over
+        form.canceled = self.canceled
         form.message = message
         form.next_to_play = self.game_state[0]
         form.board = self.game_state[1]
@@ -129,17 +130,18 @@ class GameForm(messages.Message):
     """GameForm for outbound game state information"""
     urlsafe_key = messages.StringField(1, required=True)
     game_over = messages.BooleanField(2, required=True)
-    message = messages.StringField(3, required=True)
-    north_user_name = messages.StringField(4, required=True) # TODO: Check if necessary
-    south_user_name = messages.StringField(5, required=True) # TODO: Check if necessary
-    next_to_play = messages.StringField(6, required=True)
-    board = messages.IntegerField(7, repeated=True,
+    canceled = messages.BooleanField(3, required=True)
+    message = messages.StringField(4, required=True)
+    north_user_name = messages.StringField(5, required=True) # TODO: Check if necessary
+    south_user_name = messages.StringField(6, required=True) # TODO: Check if necessary
+    next_to_play = messages.StringField(7, required=True)
+    board = messages.IntegerField(8, repeated=True,
                                   # Required to overcome bug which represented
                                   # integers as strings in JSON response:
                                   variant=messages.Variant.INT32)
-    north_final_score = messages.IntegerField(8, required=False,
+    north_final_score = messages.IntegerField(9, required=False,
                                               variant=messages.Variant.INT32)
-    south_final_score = messages.IntegerField(9, required=False,
+    south_final_score = messages.IntegerField(10, required=False,
                                               variant=messages.Variant.INT32)
 
 
