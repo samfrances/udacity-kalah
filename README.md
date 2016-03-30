@@ -144,3 +144,4 @@ given time. Each game can be retrieved or played by using the path parameter
  point for this Kalah project.
     - `utils.get_by_urlsafe` was used as provided, without modification.
     - The code for the `get_game` endpoint was used as provided.
+    - The code for the `create_user` endpoint was used as provided.
