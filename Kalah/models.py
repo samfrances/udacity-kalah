@@ -32,6 +32,8 @@ class Game(ndb.Model):
     game_state = ndb.PickleProperty(required=True)
     game_over = ndb.BooleanProperty(required=True, default=False)
     canceled = ndb.BooleanProperty(required=True, default=False)
+    # Included to overcome query restrictions outlawing inequality
+    # filters on more than one property:
     active = ndb.ComputedProperty(
         lambda self: (not self.game_over) and (not self.canceled))
     north_final_score = ndb.IntegerProperty(required=False)

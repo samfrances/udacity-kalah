@@ -9,7 +9,7 @@ OTHER TODO:
 
 COMPLETED TODO:
 
-Update README to reflect new game cancellation endpoint
+-
 
 COMPLETED TESTING
 
