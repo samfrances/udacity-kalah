@@ -6,9 +6,7 @@ TESTING TODO:
 OTHER TODO:
 
 Update README to reflect new game cancellation endpoint
-Update make_move endpoint so it doesn't work with canceled games
 
 COMPLETED TODO:
 
-Update GameForm to reflect whether game is canceled or not
-Consider updating get_game endpoint to change message of GameForm if game inactive
+Update make_move endpoint so it doesn't work with canceled games.

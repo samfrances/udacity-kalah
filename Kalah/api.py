@@ -88,8 +88,12 @@ class KalahApi(remote.Service):
         """Makes a move. Returns a game state with message.
         TODO: Test game plays correctly."""
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
+
+        # Check if game is finished or canceled.
         if game.game_over:
             return game.to_form('Game already over.')
+        if game.canceled:
+            return game.to_form('Cannot move because Game has been canceled.')
 
         # Check player exists
         moving_user = self.get_user_or_error(request.user_name)
