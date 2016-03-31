@@ -6,9 +6,7 @@ TESTING TODO:
 
 OTHER TODO:
 
-- Document UserRankingInfoForm
-- Document UserRankingsForm
-- Document get_user_rankings
+- 
 
 COMPLETED TODO:
 

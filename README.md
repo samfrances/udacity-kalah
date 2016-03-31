@@ -125,6 +125,13 @@ given time. Each game can be retrieved or played by using the path parameter
           completed or canceled.
         - endpoints.NotFoundException (404) if the game cannot be found in 
           datastore.
+ - **get_user_rankings**
+     - Path: 'rankings'
+     - Method: GET
+     - Parameters: none
+     - Returns: UserRankingsForm, giving a descending ranking of Users by
+       ratio of wins to losses, with ties broken by the greater number of
+       draws.
 
 ##Models Included:
  - **User**
@@ -144,6 +151,10 @@ given time. Each game can be retrieved or played by using the path parameter
     - Used to make a move (house, user_name).
  - **GamesForm**
     - Provides a list of GameForms.
+ - **UserRankingInfoForm**
+     - Provides ranking info for individual Users (name, win_loss_ratio).
+ - **UserRankingsForm**
+     - Provides a list of UserRankingInfoForm forms.
  - **StringMessage**
     - General purpose String container.
 
