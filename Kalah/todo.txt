@@ -1,15 +1,26 @@
 TESTING TODO:
 
+- Test user rankings and result recording in real game setting.
 - Thoroughly test gameplay
 - Thoroughly test Game.move
 
 OTHER TODO:
 
--
+- Document UserRankingInfoForm
+- Document UserRankingsForm
+- Document get_user_rankings
 
 COMPLETED TODO:
 
--
+- Test user rankings algorithm, and win_loss_ratio computed field,
+  by directly editing number of wins, losses and draws via the
+  app engine Interactive Console.
+- Test User.record_result method directly via app engine Interactive
+  console.
+- Test that recording game results works in the context of a real game,
+  by constructing a Game (using the app engine Interactive console) one 
+  move away from a draw, win, loss etc., playing the final move via the API,
+  and observing whether the win is recorded in the datastore viewer.
 
 COMPLETED TESTING
 

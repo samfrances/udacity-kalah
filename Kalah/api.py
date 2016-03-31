@@ -13,7 +13,7 @@ from protorpc import remote, messages
 
 from models import User, Game#, Score
 from models import StringMessage, NewGameForm, GameForm, MakeMoveForm,\
-    GamesForm#, ScoreForms
+    GamesForm, UserRankingsForm#, ScoreForms
 from utils import get_by_urlsafe
 import kalah
 
@@ -177,6 +177,16 @@ class KalahApi(remote.Service):
                 raise endpoints.ForbiddenException(e.message)
         else:
             raise endpoints.NotFoundException('Game not found!')
+
+    @endpoints.method(response_message=UserRankingsForm,
+                      path='rankings',
+                      name='get_user_rankings',
+                      http_method='GET')
+    def get_user_rankings(self, request):
+        """Retrieve user rankings, according to win:loss ratio,
+        with ties broken by greatest number of draws.
+        TODO: document"""
+        return User.rankings()
 
 #     @endpoints.method(response_message=ScoreForms,
 #                       path='scores',

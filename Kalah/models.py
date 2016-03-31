@@ -14,6 +14,14 @@ class User(ndb.Model):
     """User profile"""
     name = ndb.StringProperty(required=True)
     email =ndb.StringProperty()
+    # To allow for ranking of users:
+    wins = ndb.IntegerProperty(required=True, default=0)
+    losses = ndb.IntegerProperty(required=True, default=0)
+    draws = ndb.IntegerProperty(required=True, default=0)
+    win_loss_ratio = ndb.ComputedProperty( #TODO: test
+        lambda self: (float(self.wins) / (self.wins + self.losses))
+                     if self.wins + self.losses > 0
+                     else 0.0 )
 
     def get_games(self, active_only=True):
         """Gets a user's games, by default only those which
@@ -24,6 +32,33 @@ class User(ndb.Model):
             qry = qry.filter(Game.active == True)
         return qry.fetch()
 
+    def record_result(self, result):
+        """Record win, loss or draw. 
+        A result of -1 represents a loss, 0 a draw, 1 a win"""
+        if result not in (-1, 0, 1):
+            raise ValueError("Result must be -1, 0 or 1")
+        if result == -1:
+            self.losses += 1
+        if result == 0:
+            self.draws += 1
+        if result == 1:
+            self.wins += 1
+        self.put()
+
+    def to_ranking_form(self):
+        """Returns a UserRankingInfoForm with ranking info about the User."""
+        form = UserRankingInfoForm()
+        form.name = self.name
+        form.win_loss_ratio = self.win_loss_ratio
+        return form
+
+    @classmethod
+    def rankings(cls):
+        """Return UserRankingsForm ordering users by win to loss ratio,
+        with greater number of draws used to break ties."""
+        qry = cls.query().order(-cls.win_loss_ratio, -cls.draws)
+        return UserRankingsForm(rankings=[user.to_ranking_form()
+                                             for user in qry.fetch()])
 
 class Game(ndb.Model):
     """Game object"""
@@ -64,6 +99,19 @@ class Game(ndb.Model):
             self.south_final_score = final_scores[0]
             self.north_final_score = final_scores[1]
 
+            # Update user ranking info
+            # win is 1, lose is -1, draw is 0
+            if final_scores[0] == final_scores[1]:
+                north_result = south_result = 0
+            elif final_scores[0] < final_scores[1]:
+                north_result = 1
+                south_result = -1
+            else:
+                north_result = -1
+                south_result = 1
+            self.north_user.get().record_result(north_result)
+            self.south_user.get().record_result(south_result)
+
         # Update game state
         self.game_state = new_game_state
 
@@ -75,8 +123,7 @@ class Game(ndb.Model):
     def cancel(self):
         """Cancels the game if it is not already finished or canceled.
         If the game is already finished or canceled, raises an
-        AttributeError
-        TODO: test"""
+        AttributeError"""
         if self.game_over:
             raise AttributeError("Cannot cancel game once it has already finished.")
         if self.canceled:
@@ -160,6 +207,17 @@ class MakeMoveForm(messages.Message):
 class GamesForm(messages.Message):
     """Form for outbound list of games"""
     games = messages.MessageField(GameForm, 1, repeated=True)
+
+class UserRankingInfoForm(messages.Message):
+    """Form for outbound ranking info about an individual User.
+    TODO: document"""
+    name = messages.StringField(1, required=True)
+    win_loss_ratio = messages.FloatField(2, required=True)
+
+class UserRankingsForm(messages.Message):
+    """Form for outbound User ranking list.
+    TODO: document"""
+    rankings = messages.MessageField(UserRankingInfoForm, 1, repeated=True)
 
 # class ScoreForm(messages.Message):
 #     """ScoreForm for outbound Score information"""
