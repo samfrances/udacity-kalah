@@ -61,7 +61,8 @@ class User(ndb.Model):
                                              for user in qry.fetch()])
 
 class Game(ndb.Model):
-    """Game object"""
+    """Game object
+    TODO: test history functionality"""
     north_user = ndb.KeyProperty(required=True, kind='User')
     south_user = ndb.KeyProperty(required=True, kind='User')
     game_state = ndb.PickleProperty(required=True)
@@ -73,6 +74,7 @@ class Game(ndb.Model):
         lambda self: (not self.game_over) and (not self.canceled))
     north_final_score = ndb.IntegerProperty(required=False)
     south_final_score = ndb.IntegerProperty(required=False)
+    history = ndb.IntegerProperty(repeated=True) # move history
 
     @classmethod
     def new_game(cls, north_user, south_user):
@@ -85,12 +87,18 @@ class Game(ndb.Model):
         game.put()
         return game
 
+    @ndb.transactional(xg=True)
     def move(self, house):
         """Accepts move, updates game state, returns a GameForm.
-        TODO: test"""
-        # Calculate result of move
+        TODO: test
+        TODO: test history functionality"""
+        # Calculate result of move.
+        # ValueError will be raised by kalah.move if move is invalid
         old_game_state = self.game_state
         new_game_state = kalah.move(old_game_state, house)
+
+        # record move history
+        self.history.append(house)
 
         # Check if the game is over
         final_scores = kalah.winner(new_game_state)
@@ -148,6 +156,14 @@ class Game(ndb.Model):
         if self.north_final_score:
             form.north_final_score = self.north_final_score
         return form
+
+    def to_history_form(self):
+        """Returns a GameHistoryForm detailing the move history of the Game,
+        as a list of houses chosen on each turn."""
+        form = GameHistoryForm()
+        form.urlsafe_key = self.key.urlsafe()
+        form.history = self.history
+        return form 
 
 #     def end_game(self, won=False):
 #         """Ends the game - if won is True, the player won. - if won is False,
@@ -209,15 +225,19 @@ class GamesForm(messages.Message):
     games = messages.MessageField(GameForm, 1, repeated=True)
 
 class UserRankingInfoForm(messages.Message):
-    """Form for outbound ranking info about an individual User.
-    TODO: document"""
+    """Form for outbound ranking info about an individual User"""
     name = messages.StringField(1, required=True)
     win_loss_ratio = messages.FloatField(2, required=True)
 
 class UserRankingsForm(messages.Message):
-    """Form for outbound User ranking list.
-    TODO: document"""
+    """Form for outbound User ranking list"""
     rankings = messages.MessageField(UserRankingInfoForm, 1, repeated=True)
+
+class GameHistoryForm(messages.Message)
+    """Form for outbound Game history records.
+    TODO: document, test"""
+    urlsafe_key = messages.StringField(1, required=True)
+    history = messages.IntegerField(2, repeated=True)
 
 # class ScoreForm(messages.Message):
 #     """ScoreForm for outbound Score information"""

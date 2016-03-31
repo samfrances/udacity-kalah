@@ -13,7 +13,7 @@ from protorpc import remote, messages
 
 from models import User, Game#, Score
 from models import StringMessage, NewGameForm, GameForm, MakeMoveForm,\
-    GamesForm, UserRankingsForm#, ScoreForms
+    GamesForm, UserRankingsForm, GameHistoryForm#, ScoreForms
 from utils import get_by_urlsafe
 import kalah
 
@@ -187,6 +187,20 @@ class KalahApi(remote.Service):
         with ties broken by greatest number of draws.
         TODO: document"""
         return User.rankings()
+
+    @endpoints.method(request_message=GET_GAME_REQUEST,
+                      response_message=GameHistoryForm,
+                      path='history/{urlsafe_game_key}',
+                      name='get_game_history',
+                      http_method='GET')
+    def get_game_history(self, request):
+        """Retrieve move history for a particular Game.
+        TODO: document, test"""
+        game = get_by_urlsafe(request.urlsafe_game_key, Game)
+        if game:
+            return game.to_history_form()
+        else:
+            raise endpoints.NotFoundException('Game not found!')
 
 #     @endpoints.method(response_message=ScoreForms,
 #                       path='scores',
