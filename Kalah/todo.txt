@@ -1,6 +1,5 @@
 TESTING TODO:
 
-- Test game history functionality
 - Test user rankings and result recording in real game setting.
 - Thoroughly test gameplay
 - Thoroughly test Game.move
