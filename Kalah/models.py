@@ -234,8 +234,7 @@ class UserRankingsForm(messages.Message):
     rankings = messages.MessageField(UserRankingInfoForm, 1, repeated=True)
 
 class GameHistoryForm(messages.Message):
-    """Form for outbound Game history records.
-    TODO: document, test"""
+    """Form for outbound Game history records."""
     urlsafe_key = messages.StringField(1, required=True)
     history = messages.IntegerField(2, repeated=True, 
                                     variant=messages.Variant.INT32)

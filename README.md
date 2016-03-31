@@ -132,6 +132,12 @@ given time. Each game can be retrieved or played by using the path parameter
      - Returns: UserRankingsForm, giving a descending ranking of Users by
        ratio of wins to losses, with ties broken by the greater number of
        draws.
+ - **get_game_history**
+     - Path: 'history/{urlsafe_game_key}'
+     - Method: GET
+     - Parameters: urlsafe_game_key
+     - Returns: GameHistoryForm, giving a list of integers representing
+       the house chosen on each turn.
 
 ##Models Included:
  - **User**
@@ -155,6 +161,9 @@ given time. Each game can be retrieved or played by using the path parameter
      - Provides ranking info for individual Users (name, win_loss_ratio).
  - **UserRankingsForm**
      - Provides a list of UserRankingInfoForm forms.
+ - **GameHistoryForm**
+     - Provides a list of moves giving the history of a game. Each move
+       is given as an integer representing the house chosen in that turn.
  - **StringMessage**
     - General purpose String container.
 

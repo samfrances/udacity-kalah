@@ -196,8 +196,7 @@ class KalahApi(remote.Service):
                       name='get_game_history',
                       http_method='GET')
     def get_game_history(self, request):
-        """Retrieve move history for a particular Game.
-        TODO: document, test"""
+        """Retrieve move history for a particular Game."""
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
         if game:
             return game.to_history_form()
