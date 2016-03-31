@@ -18,7 +18,7 @@ class User(ndb.Model):
     wins = ndb.IntegerProperty(required=True, default=0)
     losses = ndb.IntegerProperty(required=True, default=0)
     draws = ndb.IntegerProperty(required=True, default=0)
-    win_loss_ratio = ndb.ComputedProperty( #TODO: test
+    win_loss_ratio = ndb.ComputedProperty(
         lambda self: (float(self.wins) / (self.wins + self.losses))
                      if self.wins + self.losses > 0
                      else 0.0 )
@@ -61,8 +61,7 @@ class User(ndb.Model):
                                              for user in qry.fetch()])
 
 class Game(ndb.Model):
-    """Game object
-    TODO: test history functionality"""
+    """Game object"""
     north_user = ndb.KeyProperty(required=True, kind='User')
     south_user = ndb.KeyProperty(required=True, kind='User')
     game_state = ndb.PickleProperty(required=True)
@@ -89,9 +88,7 @@ class Game(ndb.Model):
 
     @ndb.transactional(xg=True)
     def move(self, house):
-        """Accepts move, updates game state, returns a GameForm.
-        TODO: test
-        TODO: test history functionality"""
+        """Accepts move, updates game state, returns a GameForm."""
         # Calculate result of move.
         # ValueError will be raised by kalah.move if move is invalid
         old_game_state = self.game_state

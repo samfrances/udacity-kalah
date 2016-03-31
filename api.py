@@ -85,8 +85,7 @@ class KalahApi(remote.Service):
                       name='make_move',
                       http_method='PUT')
     def make_move(self, request):
-        """Makes a move. Returns a game state with message.
-        TODO: Test game plays correctly."""
+        """Makes a move. Returns a game state with message"""
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
 
         # Check if game is finished or canceled.
@@ -186,8 +185,7 @@ class KalahApi(remote.Service):
                       http_method='GET')
     def get_user_rankings(self, request):
         """Retrieve user rankings, according to win:loss ratio,
-        with ties broken by greatest number of draws.
-        TODO: document"""
+        with ties broken by greatest number of draws."""
         return User.rankings()
 
     @endpoints.method(request_message=GET_GAME_REQUEST,

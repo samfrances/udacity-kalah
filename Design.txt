@@ -1,0 +1,14 @@
+# What additional properties did you add to your models and why?
+
+- The User model gained additional properties to record the numbers of wins, losses and draws, and a computed property to provide win/loss ratio.
+    + This model also gained methods to get a list of a user's active games, to record data for ranking, to provide a ranking form, and to return a ranked list of these forms representing user rankings according to win/loss ratio.
+- The Game model gained additional properties storing the keys of each of the two players, storing the state of the Kalah board, recording whether the game has been canceled or not, recording final scores and recording the history of moves made in the game.
+    + New methods have been created for making a move, canceling the game, and returning a form giving the history of moves in the game.
+
+# What were some of the trade-offs or struggles you faced when implementing the new game logic?
+
+- I struggled with the requirement that ndb queries can only apply inequality filters using one property. I generally resolved this by combining the different properties that would have required separate inequality filters into one computed property.
+    + For example, see `Game.active`.
+- I also struggled at times with testing.
+    + For example, testing the user ranking system required me to create a situation where a game ends in a draw, a win for one player or the other, etc. 
+    + However, I am not skilled enough at Kalah to create such an outcome naturally. Therefore I had to "cheat" by using the app engine interactive console to modify a game's state to place it just on the verge of a draw. I could then use the API to complete the draw, and observe whether the expected changes took place using the datastore viewer.
