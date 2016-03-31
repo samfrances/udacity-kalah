@@ -9,7 +9,7 @@ primarily with communication to/from the API's users."""
 import endpoints
 from protorpc import remote, messages
 # from google.appengine.api import memcache
-# from google.appengine.api import taskqueue
+from google.appengine.api import taskqueue
 
 from models import User, Game#, Score
 from models import StringMessage, NewGameForm, GameForm, MakeMoveForm,\
@@ -131,6 +131,8 @@ class KalahApi(remote.Service):
                 msg += '{} wins!'.format(winner_name)
             else:
                 msg += "Draw!"
+        else: # If the game isn't over, send a reminder to the next player
+            taskqueue.add(url='/tasks/send_reminder', params={'urlsafe_key': game.key.urlsafe()})
 
         print "-------------------"
         print kalah._print_board_plus_legend(game.game_state[1])
