@@ -78,10 +78,9 @@ given time. Each game can be retrieved or played by using the path parameter
  - kalah.py: Handles the game logic.
  - api.py: Contains endpoints and game playing logic.
  - app.yaml: App configuration.
- - cron.yaml: Cronjob configuration.
- - main.py: Handler for taskqueue handler. TODO: work out if still needed
+ - main.py: Handler for taskqueue handler.
  - models.py: Entity and message definitions including helper methods.
- - utils.py: Helper function for retrieving ndb.Models by urlsafe Key string. TODO: work out if still needed
+ - utils.py: Helper function for retrieving ndb.Models by urlsafe Key string.
 
 ##Endpoints Included:
  - **create_user**
@@ -114,7 +113,7 @@ given time. Each game can be retrieved or played by using the path parameter
     - Path: 'user/games'
     - Method: GET
     - Parameters: user_name, email (optional)
-    - Returns: GamesForm with games associated with given user.
+    - Returns: GamesForm providing a list of games associated with given user.
  - **cancel_game**
     - Path: 'game/{urlsafe_game_key}'
     - Method: DELETE
@@ -148,9 +147,23 @@ given time. Each game can be retrieved or played by using the path parameter
     
 ##Forms Included:
  - **GameForm**
-    - Represents current game state (urlsafe_key, game_over, message,
-    north_user_name, south_user_name, next_to_play, board, north_final_score,
-    south_final_score)
+    - Represents current game state.
+    - Fields:
+        - urlsafe_key (string)
+        - game_over (true/false)
+        - canceled (true/false)
+        - message (string)
+        - north_user_name (string)
+        - south_user_name (string)
+        - next_to_play (string)
+            + "N" if the North player plays next, otherwise "S" if the
+              South player plays next.
+        - board (array)
+            + List of integers representing the state of the Kalah board
+        - north_final_score (integer)
+            + (Only once game has finished)
+        - south_final_score (integer)
+            + (Only once game has finished)
  - **NewGameForm**
     - Used to create a new game (north_user_name, south_user_name).
  - **MakeMoveForm**
