@@ -117,17 +117,18 @@ def _sow(board, house):
     next_board[house] = 0
 
     # Sow seeds
-    current_house = house + 1
+    current_house = house
     while (seeds > 0):
-        if current_house == opponents_house:
-            continue
-        next_board[current_house] += 1
-        seeds -= 1
         current_house = (current_house + 1) % 14
         # Uses modulo to ensure that indices wrap around to 0 after the last index
         # is reached. For example, if the user sows from house 12, which
         # contains 5 seeds, the houses / stores at index 13, 0, 1, 2 and 3 would be 
         # incremented.
+
+        if current_house == opponents_house:
+            continue
+        next_board[current_house] += 1
+        seeds -= 1
 
     next_board = tuple(next_board)
 
