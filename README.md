@@ -78,6 +78,7 @@ given time. Each game can be retrieved or played by using the path parameter
  - kalah.py: Handles the game logic.
  - api.py: Contains endpoints and game playing logic.
  - app.yaml: App configuration.
+ - cron.yaml: Cronjob configuration.
  - main.py: Handler for taskqueue handler.
  - models.py: Entity and message definitions including helper methods.
  - utils.py: Helper function for retrieving ndb.Models by urlsafe Key string.

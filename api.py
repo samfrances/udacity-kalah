@@ -27,7 +27,8 @@ MAKE_MOVE_REQUEST = endpoints.ResourceContainer(
     MakeMoveForm,
     urlsafe_game_key=messages.StringField(1),)
 USER_REQUEST = endpoints.ResourceContainer(user_name=messages.StringField(1),
-                                           email=messages.StringField(2))
+                                           email=messages.StringField(2),
+                                           active_only=messages.BooleanField(3, default=True))
 
 # MEMCACHE_MOVES_REMAINING = 'MOVES_REMAINING'
 
@@ -163,7 +164,7 @@ class KalahApi(remote.Service):
     def get_user_games(self, request):
         """Get a user's active games."""
         user = self.get_user_or_error(request.user_name)
-        games = user.get_games(active_only=True)
+        games = user.get_games(active_only=request.active_only)
         return GamesForm(games=[game.to_form() for game in games])
 
     @endpoints.method(request_message=GET_GAME_REQUEST,
