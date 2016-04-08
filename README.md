@@ -137,6 +137,11 @@ given time. Each game can be retrieved or played by using the path parameter
      - Parameters: urlsafe_game_key, verbose (default: False)
      - Returns: GameHistoryForm, giving a list of integers representing
        the house chosen on each turn.
+ - **get_completed_games**
+     - Path: 'games/completed'
+     - Method: GET
+     - Parameters: none
+     - Returns: GamesForm providing list of all completed games.
 
 ##Models Included:
  - **User**

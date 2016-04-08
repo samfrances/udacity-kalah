@@ -133,8 +133,14 @@ class KalahApi(remote.Service):
                 msg += '{} wins!'.format(winner_name)
             else:
                 msg += "Draw!"
-        else: # If the game isn't over, send a reminder to the next player
+        else: # If the game isn't over
+            # send a reminder to the next player
             taskqueue.add(url='/tasks/send_reminder', params={'urlsafe_key': game.key.urlsafe()})
+
+            # Create an appropriate message TODO: TEST
+            msg_params = ("North", 7, 12) if game.game_state[0] == 'N' else ("South", 0, 5)
+            msg = "{} player's turn. Enter an integer between {} and {}.".format(*msg_params)
+
 
         return game.to_form(msg)
 
@@ -199,5 +205,16 @@ class KalahApi(remote.Service):
             return game.to_history_form(request.verbose)
         else:
             raise endpoints.NotFoundException('Game not found!')
+
+# = = = Extra endpoints in response to comments = = = = = = = = =
+
+    @endpoints.method(response_message=GamesForm,
+                      path='games/completed',
+                      name='get_completed_games',
+                      http_method='GET')
+    def get_completed_games(self, request):
+        """Retrieve all completed games."""
+        games = Game.query(Game.game_over == True).fetch()
+        return GamesForm(games=[game.to_form() for game in games])
 
 api = endpoints.api_server([KalahApi])
