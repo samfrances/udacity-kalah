@@ -159,9 +159,9 @@ class KalahApi(remote.Service):
 
     @endpoints.method(request_message=GET_GAME_REQUEST,
                       response_message=StringMessage,
-                      path='game/{urlsafe_game_key}',
+                      path='game/{urlsafe_game_key}/cancel',
                       name='cancel_game',
-                      http_method='DELETE')
+                      http_method='PUT')
     def cancel_game(self, request):
         """Cancels the specified game, returning an error
         if the game is already over or canceled."""

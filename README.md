@@ -115,8 +115,8 @@ given time. Each game can be retrieved or played by using the path parameter
     - Parameters: user_name, email (optional)
     - Returns: GamesForm providing a list of games associated with given user.
  - **cancel_game**
-    - Path: 'game/{urlsafe_game_key}'
-    - Method: DELETE
+    - Path: 'game/{urlsafe_game_key}/cancel'
+    - Method: PUT
     - Parameters: urlsafe_game_key
     - Returns: StringMessage confirming cancellation of game.
     - Errors:
