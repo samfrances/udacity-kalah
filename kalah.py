@@ -30,8 +30,8 @@ HOUSES = {'N': NORTHERN_HOUSES,
           'All': SOUTHERN_HOUSES + NORTHERN_HOUSES}
 OPPOSITE_HOUSES = dict(
     zip(SOUTHERN_HOUSES,
-        reversed(NORTHERN_HOUSES))
-    + zip(NORTHERN_HOUSES,
+        reversed(NORTHERN_HOUSES)) +
+    zip(NORTHERN_HOUSES,
         reversed(SOUTHERN_HOUSES)))
 
 def newGame(north_starts=True):
@@ -106,20 +106,32 @@ def _sow(board, house):
     
     seeds = board[house]
 
-    # List of the indexes of houses to increment. Uses modulo to ensure that
-    # indices wrap around to 0 after the last index is reached. For example,
-    # If the user sows from house 12, which contains 5 seeds, the houses / 
-    # stores at index 13, 0, 1, 2 and 3 would be incremented.
-    houses_to_increment = [i % 14 for i in range(house+1, house+seeds+1)]
+    # calculate which house belongs to opponent, so that we can satisfy the
+    # rule that a user does not place seeds in their opponent's store
+    opponents_house = 13 if house < 6 else 6
 
-    # Create new board
-    new_board = tuple(n + 1 if i in houses_to_increment # Increment clockwise
-                      else 0 if i == house # remove seeds from chosen house
-                      else n # Leave other houses untouched
-                      for i, n in enumerate(board))
-                        # i is the index, n the value at that index
+    # duplicate input board
+    next_board = list(board)[:] 
 
-    return new_board
+    # remove seeds from chosen house
+    next_board[house] = 0
+
+    # Sow seeds
+    current_house = house + 1
+    while (seeds > 0):
+        if current_house == opponents_house:
+            continue
+        next_board[current_house] += 1
+        seeds -= 1
+        current_house = (current_house + 1) % 14
+        # Uses modulo to ensure that indices wrap around to 0 after the last index
+        # is reached. For example, if the user sows from house 12, which
+        # contains 5 seeds, the houses / stores at index 13, 0, 1, 2 and 3 would be 
+        # incremented.
+
+    next_board = tuple(next_board)
+
+    return next_board
 
 def _capture_opposites(board_pre_sowing,
                        board_post_sowing,
@@ -155,12 +167,12 @@ def _capture_opposites(board_pre_sowing,
     new_score = (board_post_sowing[winning_store]
                  + board_post_sowing[OPPOSITE_HOUSES[last_house_sown]]
                  + 1) 
-    new_board = tuple(0 if i in (last_house_sown,
+    next_board = tuple(0 if i in (last_house_sown,
                                  OPPOSITE_HOUSES[last_house_sown])
                       else new_score if i == winning_store
                       else n
                       for i, n in enumerate(board_post_sowing))
-    return new_board
+    return next_board
 
 def move(game_state, house):
     """Specifies a move on a board, by giving the house from which 'seeds' 
@@ -186,14 +198,14 @@ def move(game_state, house):
     player, old_board = game_state
 
     # Sow seeds
-    new_board = _sow(old_board, house)
+    next_board = _sow(old_board, house)
 
     # If the last sown seed lands in an empty house owned by the player, and
     # the opposite house contains seeds, both the last seed and the opposite
     # seeds are captured and placed into the player's store.
     last_house_sown = house + old_board[house]
-    new_board = _capture_opposites(old_board,
-                                   new_board,
+    next_board = _capture_opposites(old_board,
+                                   next_board,
                                    last_house_sown,
                                    player)
 
@@ -204,7 +216,7 @@ def move(game_state, house):
     else:
         next_player = 'N' if player == 'S' else 'S'
 
-    return (next_player, new_board)
+    return (next_player, next_board)
 
 
 

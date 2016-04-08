@@ -138,7 +138,7 @@ class KalahApi(remote.Service):
             # send a reminder to the next player
             taskqueue.add(url='/tasks/send_reminder', params={'urlsafe_key': game.key.urlsafe()})
 
-            # Create an appropriate message TODO: TEST
+            # Create an appropriate message
             msg_params = ("North", 7, 12) if game.game_state[0] == 'N' else ("South", 0, 5)
             msg = "{} player's turn. Enter an integer between {} and {}.".format(*msg_params)
 

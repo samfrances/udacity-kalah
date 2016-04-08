@@ -37,11 +37,11 @@ class User(ndb.Model):
         A result of -1 represents a loss, 0 a draw, 1 a win"""
         if result not in (-1, 0, 1):
             raise ValueError("Result must be -1, 0 or 1")
-        if result == -1:
+        elif result == -1:
             self.losses += 1
-        if result == 0:
+        elif result == 0:
             self.draws += 1
-        if result == 1:
+        elif result == 1:
             self.wins += 1
         self.put()
 
