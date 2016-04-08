@@ -26,15 +26,16 @@ class SendReminderEmail(webapp2.RequestHandler):
             user = game.south_user.get()
             opponent = game.north_user.get()
         
-        subject = 'Your turn to play, {}!'.format(user.name)
-        body = 'Hello {}, it\'s your turn to play in your game against {}!'
-        body = body.format(user.name, opponent.name)
-        # This will send test emails, the arguments to send_mail are:
-        # from, to, subject, body
-        mail.send_mail('noreply@{}.appspotmail.com'.format(app_id),
-                       user.email,
-                       subject,
-                       body)
+        if user.email:
+            subject = 'Your turn to play, {}!'.format(user.name)
+            body = 'Hello {}, it\'s your turn to play in your game against {}!'
+            body = body.format(user.name, opponent.name)
+            # This will send test emails, the arguments to send_mail are:
+            # from, to, subject, body
+            mail.send_mail('noreply@{}.appspotmail.com'.format(app_id),
+                           user.email,
+                           subject,
+                           body)
 
 app = webapp2.WSGIApplication([
     ('/tasks/send_reminder', SendReminderEmail),

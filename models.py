@@ -139,6 +139,8 @@ class Game(ndb.Model):
 
     def to_form(self, message=''):
         """Returns a GameForm representation of the Game"""
+        board = self.game_state[1]
+
         form = GameForm()
         form.urlsafe_key = self.key.urlsafe()
         form.north_user_name = self.north_user.get().name
@@ -147,7 +149,8 @@ class Game(ndb.Model):
         form.canceled = self.canceled
         form.message = message
         form.next_to_play = self.game_state[0]
-        form.board = self.game_state[1]
+        form.board = board
+        form.pretty_board = kalah.print_board_plus_legend(board).splitlines()
         if self.south_final_score:
             form.south_final_score = self.south_final_score
         if self.north_final_score:
@@ -171,16 +174,20 @@ class GameForm(messages.Message):
     game_over = messages.BooleanField(2, required=True)
     canceled = messages.BooleanField(3, required=True)
     message = messages.StringField(4, required=True)
-    north_user_name = messages.StringField(5, required=True) # TODO: Check if necessary
-    south_user_name = messages.StringField(6, required=True) # TODO: Check if necessary
+    north_user_name = messages.StringField(5, required=True)
+    south_user_name = messages.StringField(6, required=True)
     next_to_play = messages.StringField(7, required=True)
     board = messages.IntegerField(8, repeated=True,
                                   # Required to overcome bug which represented
                                   # integers as strings in JSON response:
                                   variant=messages.Variant.INT32)
-    north_final_score = messages.IntegerField(9, required=False,
+    # The pretty_board field makes it easier to play using API explorer.
+    # A repeated StringField is used rather than a single string with newlines
+    # because the API explorer won't display newlines attractively.
+    pretty_board = messages.StringField(9, repeated=True)
+    north_final_score = messages.IntegerField(10, required=False,
                                               variant=messages.Variant.INT32)
-    south_final_score = messages.IntegerField(10, required=False,
+    south_final_score = messages.IntegerField(11, required=False,
                                               variant=messages.Variant.INT32)
 
 

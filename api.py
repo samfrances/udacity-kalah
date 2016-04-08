@@ -133,10 +133,6 @@ class KalahApi(remote.Service):
         else: # If the game isn't over, send a reminder to the next player
             taskqueue.add(url='/tasks/send_reminder', params={'urlsafe_key': game.key.urlsafe()})
 
-        print "-------------------"
-        print kalah._print_board_plus_legend(game.game_state[1])
-        print "-------------------"
-
         return game.to_form(msg)
 
     def get_user_or_error(self, user_name):

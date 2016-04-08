@@ -229,15 +229,14 @@ def winner(game_state):
         south_score = board[SOUTHERN_STORE] + south_houses_sum
         return (south_score, north_score)
 
-def _print_board(board):
+def print_board(board):
     """Prettily print a Kalah board."""
 
-    template = """
-       <--- North
+    template = """       <--- North
  ------------------------    
   {12:>2}  {11:>2}  {10:>2}  {9:>2}  {8:>2}  {7:>2}     
                              
-  {13:>2}                  {6:>2}    
+ {13:>3}                 {6:>3}    
                             
   {0:>2}  {1:>2}  {2:>2}  {3:>2}  {4:>2}  {5:>2}
  ------------------------     
@@ -245,12 +244,13 @@ def _print_board(board):
 """
     return template.format(*board)
 
-def _print_board_plus_legend(board):
+def print_board_plus_legend(board):
     """Return a string, representing in easily readable format: a board, plus 
     a 'legend' showing the numbers of each house / store, side by side"""
 
-    board_lines = _print_board(board).split('\n')
-    legend_lines = _print_board(range(14)).split('\n')
+    board_lines = print_board(board).splitlines()
+    legend_vals = range(6) + ["(6)"] + range(7, 13) + ["(13)"]
+    legend_lines = print_board(legend_vals).splitlines()
     lines = ( "{:<30}{:<30}".format(*pair)
               for pair in zip(board_lines, legend_lines) )
     return '\n'.join(lines)
@@ -263,11 +263,11 @@ def command_line_game():
         player, board = game_state
         final_scores = winner(game_state)
         if final_scores:
-            print _print_board(board)
+            print print_board(board)
             print "South: {}, North: {}".format(*final_scores)
             print "Good game.\n"
             exit()
-        print _print_board_plus_legend(board)
+        print "\n" + print_board_plus_legend(board) + "\n"
         player_name = ('Northern player' if player == 'N'
                        else 'Southern player')
         
