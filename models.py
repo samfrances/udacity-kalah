@@ -157,13 +157,33 @@ class Game(ndb.Model):
             form.north_final_score = self.north_final_score
         return form
 
-    def to_history_form(self):
+    def to_history_form(self, verbose=False):
         """Returns a GameHistoryForm detailing the move history of the Game,
         as a list of houses chosen on each turn."""
-        form = GameHistoryForm()
-        form.urlsafe_key = self.key.urlsafe()
-        form.history = self.history
-        return form 
+        history_form = GameHistoryForm()
+        history_form.urlsafe_key = self.key.urlsafe()
+        history_form.history = self.history
+        
+        # Add details for verbose history:
+        if verbose:
+            # Populate verbose history
+            for house in self.history:
+                # Determine whether North or South player played
+                player = 'S' if house < 6 else 'N'
+
+                # Construct verbose record of move
+                move_form = MoveForm()
+                move_form.player = player
+                move_form.house = house
+                history_form.verbose_history.append(move_form)
+                # Alternate players
+                player = 'N' if player == 'S' else 'S'
+
+            # Add player details
+            history_form.north_user_name = self.north_user.get().name
+            history_form.south_user_name = self.south_user.get().name
+        
+        return history_form 
 
 
 # - - - Message Forms - - - - - - - - - - - - - - - -
@@ -176,6 +196,7 @@ class GameForm(messages.Message):
     message = messages.StringField(4, required=True)
     north_user_name = messages.StringField(5, required=True)
     south_user_name = messages.StringField(6, required=True)
+    # Either 'N' or 'S':
     next_to_play = messages.StringField(7, required=True)
     board = messages.IntegerField(8, repeated=True,
                                   # Required to overcome bug which represented
@@ -214,11 +235,21 @@ class UserRankingsForm(messages.Message):
     """Form for outbound User ranking list"""
     rankings = messages.MessageField(UserRankingInfoForm, 1, repeated=True)
 
+class MoveForm(messages.Message):
+    """Form to record individual moves, for verbose Game history"""
+    # Either 'N' or 'S':
+    player = messages.StringField(1, required=True)
+    house = messages.IntegerField(2, required=True)
+
 class GameHistoryForm(messages.Message):
     """Form for outbound Game history records."""
     urlsafe_key = messages.StringField(1, required=True)
     history = messages.IntegerField(2, repeated=True, 
                                     variant=messages.Variant.INT32)
+    verbose_history = messages.MessageField(MoveForm, 3, repeated=True)
+    north_user_name = messages.StringField(5, required=False)
+    south_user_name = messages.StringField(6, required=False)
+
 
 class StringMessage(messages.Message):
     """StringMessage-- outbound (single) string message"""

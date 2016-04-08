@@ -20,6 +20,9 @@ import kalah
 NEW_GAME_REQUEST = endpoints.ResourceContainer(NewGameForm)
 GET_GAME_REQUEST = endpoints.ResourceContainer(
         urlsafe_game_key=messages.StringField(1),)
+GAME_HISTORY_REQUEST = endpoints.ResourceContainer(
+        urlsafe_game_key=messages.StringField(1),
+        verbose=messages.BooleanField(2, default=False))
 MAKE_MOVE_REQUEST = endpoints.ResourceContainer(
     MakeMoveForm,
     urlsafe_game_key=messages.StringField(1),)
@@ -184,7 +187,7 @@ class KalahApi(remote.Service):
         with ties broken by greatest number of draws."""
         return User.rankings()
 
-    @endpoints.method(request_message=GET_GAME_REQUEST,
+    @endpoints.method(request_message=GAME_HISTORY_REQUEST,
                       response_message=GameHistoryForm,
                       path='history/{urlsafe_game_key}',
                       name='get_game_history',
@@ -193,7 +196,7 @@ class KalahApi(remote.Service):
         """Retrieve move history for a particular Game."""
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
         if game:
-            return game.to_history_form()
+            return game.to_history_form(request.verbose)
         else:
             raise endpoints.NotFoundException('Game not found!')
 

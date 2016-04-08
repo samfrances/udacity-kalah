@@ -134,7 +134,7 @@ given time. Each game can be retrieved or played by using the path parameter
  - **get_game_history**
      - Path: 'history/{urlsafe_game_key}'
      - Method: GET
-     - Parameters: urlsafe_game_key
+     - Parameters: urlsafe_game_key, verbose (default: False)
      - Returns: GameHistoryForm, giving a list of integers representing
        the house chosen on each turn.
 
@@ -176,9 +176,23 @@ given time. Each game can be retrieved or played by using the path parameter
      - Provides ranking info for individual Users (name, win_loss_ratio).
  - **UserRankingsForm**
      - Provides a list of UserRankingInfoForm forms.
+ - **MoveForm**
+     - Provides a more verbose description of a move, for use in displaying verbose history.
+     - Fields:
+       + player (string, either 'N' or 'S')
+       + house (integer)
  - **GameHistoryForm**
      - Provides a list of moves giving the history of a game. Each move
        is given as an integer representing the house chosen in that turn.
+     - Fields:
+       + urlsafe_key (string)
+       + history (array of integers)
+       + verbose_history (array of `MoveForms`)
+         * Optional: only if verbose history requested
+       + north_user_name (string)
+         * Optional: only if verbose history requested
+       + south_user_name (string)
+         * Optional: only if verbose history requested
  - **StringMessage**
     - General purpose String container.
 
