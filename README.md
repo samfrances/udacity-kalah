@@ -160,6 +160,8 @@ given time. Each game can be retrieved or played by using the path parameter
               South player plays next.
         - board (array)
             + List of integers representing the state of the Kalah board
+        - pretty_board (array of strings)
+            + Used in order to display the board prettily and readably in Google API explorer, together with a legend showing the number of each house.
         - north_final_score (integer)
             + (Only once game has finished)
         - south_final_score (integer)
