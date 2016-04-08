@@ -1,4 +1,4 @@
-#Kalah Game API (Udacity Full Stack Nanodegree, Project 4 submission)
+# Kalah Game API (Udacity Full Stack Nanodegree, Project 4 submission)
 
 ## Set-Up Instructions:
 1.  Update the value of application in app.yaml to the app ID you have registered
@@ -37,8 +37,7 @@ The rules are as follows:
 >
 > It is possible for the game to end in a draw.
 >
-> [https://en.wikipedia.org/wiki/Kalah#Rules]
-> (https://en.wikipedia.org/wiki/Kalah#Rules)
+> https://en.wikipedia.org/wiki/Kalah#Rules
 
 The Kalah board is internally represented a tuple of 14 integers, with indexes 0-5
 representing the South player's houses, indexes 7-12 representing the North
