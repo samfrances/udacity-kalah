@@ -23,9 +23,11 @@ GAME_HISTORY_REQUEST = endpoints.ResourceContainer(
 MAKE_MOVE_REQUEST = endpoints.ResourceContainer(
     MakeMoveForm,
     urlsafe_game_key=messages.StringField(1),)
-USER_REQUEST = endpoints.ResourceContainer(user_name=messages.StringField(1),
-                                           email=messages.StringField(2),
-                                           active_only=messages.BooleanField(3, default=True))
+USER_REQUEST = endpoints.ResourceContainer(
+    user_name=messages.StringField(1),
+    email=messages.StringField(2),
+    active_only=messages.BooleanField(3, default=True))
+
 
 @endpoints.api(name='kalah', version='v1')
 class KalahApi(remote.Service):
@@ -56,10 +58,6 @@ class KalahApi(remote.Service):
         south_user = self.get_user_or_error(request.south_user_name)
         game = Game.new_game(north_user.key, south_user.key)
 
-        # Use a task queue to update the average attempts remaining.
-        # This operation is not needed to complete the creation of a new game
-        # so it is performed out of sequence.
-        #taskqueue.add(url='/tasks/cache_average_attempts')
         return game.to_form('Good luck playing Kalah!')
 
     @endpoints.method(request_message=GET_GAME_REQUEST,
@@ -107,7 +105,7 @@ class KalahApi(remote.Service):
             legitimate_moving_user_id = game.north_user.id()
         else:
             legitimate_moving_user_id = game.south_user.id()
-        
+
         if moving_user_id != legitimate_moving_user_id:
             return game.to_form('Player moved out of turn.')
 
@@ -129,14 +127,16 @@ class KalahApi(remote.Service):
                 msg += '{} wins!'.format(winner_name)
             else:
                 msg += "Draw!"
-        else: # If the game isn't over
+        else:    # If the game isn't over
             # send a reminder to the next player
-            taskqueue.add(url='/tasks/send_reminder', params={'urlsafe_key': game.key.urlsafe()})
+            taskqueue.add(url='/tasks/send_reminder',
+                          params={'urlsafe_key': game.key.urlsafe()})
 
             # Create an appropriate message
-            msg_params = ("North", 7, 12) if game.game_state[0] == 'N' else ("South", 0, 5)
-            msg = "{} player's turn. Enter an integer between {} and {}.".format(*msg_params)
-
+            msg_params = (("North", 7, 12) if game.game_state[0] == 'N'
+                          else ("South", 0, 5))
+            msg = "{} player's turn. Enter an integer between {} and {}."
+            msg = msg.format(*msg_params)
 
         return game.to_form(msg)
 

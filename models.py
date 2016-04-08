@@ -10,18 +10,19 @@ import kalah
 
 # - - - Datastore models - - - - - - - - - - - - -
 
+
 class User(ndb.Model):
     """User profile"""
     name = ndb.StringProperty(required=True)
-    email =ndb.StringProperty()
+    email = ndb.StringProperty()
     # To allow for ranking of users:
     wins = ndb.IntegerProperty(required=True, default=0)
     losses = ndb.IntegerProperty(required=True, default=0)
     draws = ndb.IntegerProperty(required=True, default=0)
     win_loss_ratio = ndb.ComputedProperty(
-        lambda self: (float(self.wins) / (self.wins + self.losses))
-                     if self.wins + self.losses > 0
-                     else 0.0 )
+        lambda self: ((float(self.wins) / (self.wins + self.losses))
+                      if self.wins + self.losses > 0
+                      else 0.0))
 
     def get_games(self, active_only=True):
         """Gets a user's games, by default only those which
@@ -33,7 +34,7 @@ class User(ndb.Model):
         return qry.fetch()
 
     def record_result(self, result):
-        """Record win, loss or draw. 
+        """Record win, loss or draw.
         A result of -1 represents a loss, 0 a draw, 1 a win"""
         if result not in (-1, 0, 1):
             raise ValueError("Result must be -1, 0 or 1")
@@ -58,7 +59,8 @@ class User(ndb.Model):
         with greater number of draws used to break ties."""
         qry = cls.query().order(-cls.win_loss_ratio, -cls.draws)
         return UserRankingsForm(rankings=[user.to_ranking_form()
-                                             for user in qry.fetch()])
+                                          for user in qry.fetch()])
+
 
 class Game(ndb.Model):
     """Game object"""
@@ -73,12 +75,13 @@ class Game(ndb.Model):
         lambda self: (not self.game_over) and (not self.canceled))
     north_final_score = ndb.IntegerProperty(required=False)
     south_final_score = ndb.IntegerProperty(required=False)
-    history = ndb.IntegerProperty(repeated=True) # move history
+    history = ndb.IntegerProperty(repeated=True)  # move history
 
     @classmethod
     def new_game(cls, north_user, south_user):
         """Creates and returns a new game."""
-        new_game_state = kalah.newGame(north_starts=random.choice([True, False]))
+        new_game_state = kalah.newGame(
+            north_starts=random.choice([True, False]))
         game = cls(north_user=north_user,
                    south_user=south_user,
                    game_state=new_game_state,
@@ -163,7 +166,7 @@ class Game(ndb.Model):
         history_form = GameHistoryForm()
         history_form.urlsafe_key = self.key.urlsafe()
         history_form.history = self.history
-        
+
         # Add details for verbose history:
         if verbose:
             # Populate verbose history
@@ -182,8 +185,8 @@ class Game(ndb.Model):
             # Add player details
             history_form.north_user_name = self.north_user.get().name
             history_form.south_user_name = self.south_user.get().name
-        
-        return history_form 
+
+        return history_form
 
 
 # - - - Message Forms - - - - - - - - - - - - - - - -
@@ -217,23 +220,28 @@ class NewGameForm(messages.Message):
     north_user_name = messages.StringField(1, required=True)
     south_user_name = messages.StringField(2, required=True)
 
+
 class MakeMoveForm(messages.Message):
     """Used to make a move in an existing game"""
     house = messages.IntegerField(1, required=True)
     user_name = messages.StringField(2, required=True)
 
+
 class GamesForm(messages.Message):
     """Form for outbound list of games"""
     games = messages.MessageField(GameForm, 1, repeated=True)
+
 
 class UserRankingInfoForm(messages.Message):
     """Form for outbound ranking info about an individual User"""
     name = messages.StringField(1, required=True)
     win_loss_ratio = messages.FloatField(2, required=True)
 
+
 class UserRankingsForm(messages.Message):
     """Form for outbound User ranking list"""
     rankings = messages.MessageField(UserRankingInfoForm, 1, repeated=True)
+
 
 class MoveForm(messages.Message):
     """Form to record individual moves, for verbose Game history"""
@@ -241,10 +249,11 @@ class MoveForm(messages.Message):
     player = messages.StringField(1, required=True)
     house = messages.IntegerField(2, required=True)
 
+
 class GameHistoryForm(messages.Message):
     """Form for outbound Game history records."""
     urlsafe_key = messages.StringField(1, required=True)
-    history = messages.IntegerField(2, repeated=True, 
+    history = messages.IntegerField(2, repeated=True,
                                     variant=messages.Variant.INT32)
     verbose_history = messages.MessageField(MoveForm, 3, repeated=True)
     north_user_name = messages.StringField(5, required=False)

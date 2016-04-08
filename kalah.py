@@ -17,9 +17,9 @@ https://en.wikipedia.org/wiki/Kalah#Rules
 """
 import random
 
-# Useful "constants" 
+# Useful "constants"
 SOUTHERN_HOUSES = range(6)
-NORTHERN_HOUSES = range(7,13)
+NORTHERN_HOUSES = range(7, 13)
 SOUTHERN_STORE = 6
 NORTHERN_STORE = 13
 STORES = {'N': NORTHERN_STORE,
@@ -34,6 +34,7 @@ OPPOSITE_HOUSES = dict(
     zip(NORTHERN_HOUSES,
         reversed(SOUTHERN_HOUSES)))
 
+
 def newGame(north_starts=True):
     """Create a new game, with North starting first unless otherwise
     specified."""
@@ -42,37 +43,39 @@ def newGame(north_starts=True):
     game_state = (first_player, board)
     return game_state
 
+
 def _newBoard():
     """Return a kalah(6, 3) board, represented as an array of 14 integers,
-    where the the integers at index 6 represents the southern player's 
+    where the the integers at index 6 represents the southern player's
     end-zone,   the integer at index 13 represents the northern player's
     end-zone, and the other integers represent the houses.
 
            <--- North
-    ------------------------    
-     12  11  10   9   8   7     
-                             
-     13                   6    
-                            
-      0   1   2   3   4   5      
-    ------------------------     
+    ------------------------
+     12  11  10   9   8   7
+
+     13                   6
+
+      0   1   2   3   4   5
+    ------------------------
             South --->
 
     The new board is returned in its starting state, as follows:
 
            <--- North
-    ------------------------    
-      3   3   3   3   3   3     
-                             
-      0                   0    
-                            
-      3   3   3   3   3   3      
-    ------------------------     
+    ------------------------
+      3   3   3   3   3   3
+
+      0                   0
+
+      3   3   3   3   3   3
+    ------------------------
             South --->
 
     """
-    
-    return ((3,)* 6 + (0,)) * 2
+
+    return ((3,) * 6 + (0,)) * 2
+
 
 def _validateBoard(board):
     """Validate a Kalah board.
@@ -87,10 +90,11 @@ def _validateBoard(board):
         return False
     return True
 
+
 def _validateMove(game_state, house):
     """Validates a move.
 
-    Checks if the house chosen belongs to the current player, and if it 
+    Checks if the house chosen belongs to the current player, and if it
     contains any tokens."""
 
     player, board = game_state
@@ -100,10 +104,11 @@ def _validateMove(game_state, house):
         return False
     return True
 
+
 def _sow(board, house):
     """Sows seeds from chosen house, without considering whose move it is or
     whether the move is valid."""
-    
+
     seeds = board[house]
 
     # calculate which house belongs to opponent, so that we can satisfy the
@@ -111,7 +116,7 @@ def _sow(board, house):
     opponents_house = 13 if house < 6 else 6
 
     # duplicate input board
-    next_board = list(board)[:] 
+    next_board = list(board)[:]
 
     # remove seeds from chosen house
     next_board[house] = 0
@@ -120,10 +125,10 @@ def _sow(board, house):
     current_house = house
     while (seeds > 0):
         current_house = (current_house + 1) % 14
-        # Uses modulo to ensure that indices wrap around to 0 after the last index
-        # is reached. For example, if the user sows from house 12, which
-        # contains 5 seeds, the houses / stores at index 13, 0, 1, 2 and 3 would be 
-        # incremented.
+        # Uses modulo to ensure that indices wrap around to 0 after the last
+        # index is reached. For example, if the user sows from house 12, which
+        # contains 5 seeds, the houses / stores at index 13, 0, 1, 2 and 3
+        # would be incremented.
 
         if current_house == opponents_house:
             continue
@@ -134,13 +139,14 @@ def _sow(board, house):
 
     return next_board
 
+
 def _capture_opposites(board_pre_sowing,
                        board_post_sowing,
                        last_house_sown,
                        player):
     """Takes the board state at the beginning of the turn, before any move
     has been made, and the board state after seeds has been sown, and decides
-    whether capture can take place. If not, returns the board unchanged, 
+    whether capture can take place. If not, returns the board unchanged,
     otherwise returns the board after capture has taken place.
 
     The capture rule is as follows:
@@ -159,39 +165,39 @@ def _capture_opposites(board_pre_sowing,
         If capture takes place, returns the board after capture.
         Otherwise, returns the board_post_sowing."""
 
-    if (last_house_sown not in HOUSES[player]
-        or board_pre_sowing[last_house_sown] != 0
-        or board_pre_sowing[OPPOSITE_HOUSES[last_house_sown]] == 0):
+    if (last_house_sown not in HOUSES[player] or
+            board_pre_sowing[last_house_sown] != 0 or
+            board_pre_sowing[OPPOSITE_HOUSES[last_house_sown]] == 0):
         return board_post_sowing
 
     winning_store = STORES[player]
-    new_score = (board_post_sowing[winning_store]
-                 + board_post_sowing[OPPOSITE_HOUSES[last_house_sown]]
-                 + 1) 
+    new_score = (board_post_sowing[winning_store] +
+                 board_post_sowing[OPPOSITE_HOUSES[last_house_sown]] + 1)
     next_board = tuple(0 if i in (last_house_sown,
-                                 OPPOSITE_HOUSES[last_house_sown])
-                      else new_score if i == winning_store
-                      else n
-                      for i, n in enumerate(board_post_sowing))
+                                  OPPOSITE_HOUSES[last_house_sown])
+                       else new_score if i == winning_store
+                       else n
+                       for i, n in enumerate(board_post_sowing))
     return next_board
 
+
 def move(game_state, house):
-    """Specifies a move on a board, by giving the house from which 'seeds' 
+    """Specifies a move on a board, by giving the house from which 'seeds'
     will be sown.
 
     Args:
         game_state: A tuple of the form (next player, board) representing the
             game state before the move.
         house: A number between 0 and 5 inclusive for the southern player's
-            houses, or 7 and 12 inclusive for the northern player's houses, 
-            representing the house from which the player wishes to sow seeds. 
+            houses, or 7 and 12 inclusive for the northern player's houses,
+            representing the house from which the player wishes to sow seeds.
             representing the house.
 
     Returns:
         A tuple of the form (next player, board), representing the game state
         after the move.
     """
-    
+
     # Check valid move
     if not _validateMove(game_state, house):
         raise ValueError("Invalid Kalah move.")
@@ -206,9 +212,9 @@ def move(game_state, house):
     # seeds are captured and placed into the player's store.
     last_house_sown = house + old_board[house]
     next_board = _capture_opposites(old_board,
-                                   next_board,
-                                   last_house_sown,
-                                   player)
+                                    next_board,
+                                    last_house_sown,
+                                    player)
 
     # If the last sown seed lands in the player's store, the player gets an
     # additional move.
@@ -220,10 +226,9 @@ def move(game_state, house):
     return (next_player, next_board)
 
 
-
 def winner(game_state):
     """Indicates the winner of the game if either player has won at this stage
-    in the game, or if the game is a draw, and returns None if the game is 
+    in the game, or if the game is a draw, and returns None if the game is
     still ongoing.
 
     Args:
@@ -242,31 +247,34 @@ def winner(game_state):
         south_score = board[SOUTHERN_STORE] + south_houses_sum
         return (south_score, north_score)
 
+
 def print_board(board):
     """Prettily print a Kalah board."""
 
     template = """       <--- North
- ------------------------    
-  {12:>2}  {11:>2}  {10:>2}  {9:>2}  {8:>2}  {7:>2}     
-                             
- {13:>3}                 {6:>3}    
-                            
+ ------------------------
+  {12:>2}  {11:>2}  {10:>2}  {9:>2}  {8:>2}  {7:>2}
+
+ {13:>3}                 {6:>3}
+
   {0:>2}  {1:>2}  {2:>2}  {3:>2}  {4:>2}  {5:>2}
- ------------------------     
+ ------------------------
          South --->
 """
     return template.format(*board)
 
+
 def print_board_plus_legend(board):
-    """Return a string, representing in easily readable format: a board, plus 
+    """Return a string, representing in easily readable format: a board, plus
     a 'legend' showing the numbers of each house / store, side by side"""
 
     board_lines = print_board(board).splitlines()
     legend_vals = range(6) + ["(6)"] + range(7, 13) + ["(13)"]
     legend_lines = print_board(legend_vals).splitlines()
-    lines = ( "{:<30}{:<30}".format(*pair)
-              for pair in zip(board_lines, legend_lines) )
+    lines = ("{:<30}{:<30}".format(*pair)
+             for pair in zip(board_lines, legend_lines))
     return '\n'.join(lines)
+
 
 def command_line_game():
 
@@ -283,7 +291,7 @@ def command_line_game():
         print "\n" + print_board_plus_legend(board) + "\n"
         player_name = ('Northern player' if player == 'N'
                        else 'Southern player')
-        
+
         valid_move = False
         while not valid_move:
             try:
