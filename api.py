@@ -4,16 +4,13 @@ This can also contain game logic. For more complex games it would be wise to
 move game logic to another file. Ideally the API will be simple, concerned
 primarily with communication to/from the API's users."""
 
-
-# import logging
 import endpoints
 from protorpc import remote, messages
-# from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 
-from models import User, Game#, Score
+from models import User, Game
 from models import StringMessage, NewGameForm, GameForm, MakeMoveForm,\
-    GamesForm, UserRankingsForm, GameHistoryForm#, ScoreForms
+    GamesForm, UserRankingsForm, GameHistoryForm
 from utils import get_by_urlsafe
 import kalah
 
@@ -29,8 +26,6 @@ MAKE_MOVE_REQUEST = endpoints.ResourceContainer(
 USER_REQUEST = endpoints.ResourceContainer(user_name=messages.StringField(1),
                                            email=messages.StringField(2),
                                            active_only=messages.BooleanField(3, default=True))
-
-# MEMCACHE_MOVES_REMAINING = 'MOVES_REMAINING'
 
 @endpoints.api(name='kalah', version='v1')
 class KalahApi(remote.Service):
