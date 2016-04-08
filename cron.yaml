@@ -1,0 +1,4 @@
+cron:
+- description: Send a rankings update to all users
+  url: /crons/send_rankings_update
+  schedule: every 6 hours

@@ -9,7 +9,7 @@ from google.appengine.api import mail, app_identity
 from api import KalahApi
 
 from utils import get_by_urlsafe
-from models import Game
+from models import Game, User
 
 
 class SendReminderEmail(webapp2.RequestHandler):
@@ -37,6 +37,31 @@ class SendReminderEmail(webapp2.RequestHandler):
                            subject,
                            body)
 
+class SendRankingEmail(webapp2.RequestHandler):
+    def get(self):
+        """Send an email to all users giving the user rankings"""
+        app_id = app_identity.get_application_id()
+        users = User.query(User.email != None).fetch()
+        rankings = User.query().order(-User.win_loss_ratio, -User.draws).fetch()
+
+        # Create rankings table
+        rankings_format = "{:<15}{:<15}\n"
+        header = rankings_format.format("Name", "Win/loss ratio")
+        lines = [rankings_format.format(user.name, user.win_loss_ratio) for user in rankings]
+        table = header + ''.join(lines)
+
+        # Email users
+        for user in users:
+            subject = 'Kalah rankings'
+            body = "Hello {}, here is an update on Kalah rankings:\n\n".format(user.name)
+            body += table
+            
+            mail.send_mail('noreply@{}.appspotmail.com'.format(app_id),
+                           user.email,
+                           subject,
+                           body)
+
 app = webapp2.WSGIApplication([
     ('/tasks/send_reminder', SendReminderEmail),
+    ('/crons/send_rankings_update', SendRankingEmail)
 ], debug=True)
