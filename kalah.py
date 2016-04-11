@@ -113,7 +113,7 @@ def _sow(board, house):
 
     # calculate which house belongs to opponent, so that we can satisfy the
     # rule that a user does not place seeds in their opponent's store
-    opponents_house = 13 if house < 6 else 6
+    opponents_store = 13 if house < 6 else 6
 
     # duplicate input board
     next_board = list(board)[:]
@@ -130,7 +130,7 @@ def _sow(board, house):
         # contains 5 seeds, the houses / stores at index 13, 0, 1, 2 and 3
         # would be incremented.
 
-        if current_house == opponents_house:
+        if current_house == opponents_store:
             continue
         next_board[current_house] += 1
         seeds -= 1
